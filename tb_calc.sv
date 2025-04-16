@@ -8,18 +8,11 @@ module tb_calc;
   logic[3:0] cmd;
 
   // outs
-  logic[8] a;
-  logic[8] b;
-  logic[8] c;
-  logic[8] d;
-  logic[8] e;
-  logic[8] f;
-  logic[8] g;
-  logic[8] dp;
+
 
   always #1 clock = ~clock; 
 
-  ctrl master0(.*);
+  calc calculator();
 
   initial begin
     dig = 0;
