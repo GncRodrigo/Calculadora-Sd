@@ -5,12 +5,11 @@ input logic[3:0] cmd,
 
 output logic[1:0] status,
 output logic[3:0] data,
-output logic[3:0] pos
-
+output logic[3:0] pos,
+output logic[26:0] digits
 );
-logic[26:0]digits;
 
-ctrl display_ctrl(.clock(clock), .reset(reset), .dig(data), .pos(pos));
+//logic[26:0]digits;
 
 always @(posedge clock, posedge reset)begin
     if (reset) begin
@@ -39,8 +38,26 @@ always @(posedge clock, posedge reset)begin
 
     end
 
+end
+/*
+logic [3:0] values [7:0];
+always_comb begin
+
+logic [26:0] temp;
+temp = digits;
+
+values[0] <= temp % 10; temp/10;
+values[1] <= temp % 10; temp/10;
+values[2] <= temp % 10; temp/10;
+values[3] <= temp % 10; temp/10;
+values[4] <= temp % 10; temp/10;
+values[5] <= temp % 10; temp/10;
+values[6] <= temp % 10; temp/10;
+values[7] <= temp % 10; 
+
 
 end
+*/
 
 
 
