@@ -1,100 +1,143 @@
-module calc(
-input logic clock,
-input logic reset,
-input logic[3:0] cmd,
+module calc (
+    input  logic clock,
+    input  logic reset,
+    input  logic [3:0] cmd,
 
-output logic[1:0] status,
-output logic[3:0] data,
-output logic[3:0] pos,
-
+    output logic [1:0] status,
+    output logic [3:0] data,
+    output logic [3:0] pos
 );
 
-// maquina de estados para ter: ESPERA_A, ESPERA_B, OP, RESULT, ERRO, OCUPADA
-typedef enum logic[2:0] {  
+    typedef enum logic [2:0] {
+        ESPERA_A = 3'b000,
+        ESPERA_B = 3'b001,
+        OP       = 3'b010,
+        RESULT   = 3'b011,
+        ERRO     = 3'b100
+    } estados_calc;
 
-    ESPERA_A = 3'b000,
-    ESPERA_B = 3'b001,
-    OP       = 3'b010,
-    ERRO     = 3'b011,
-    RESULT   = 3'b1000
+    estados_calc EA, PE;
 
-} estados_calc;
-// EA = estado atual, PE = próximo estado
-estados_calc    EA, PE;
-//começa sempre esperando registrador A
-always_ff @(posedge clock, posedge reset)begin
-    if(reset) begin
-        EA <= ESPERA_A;
+    logic [26:0] digits;
+    logic [26:0] regA, regB, regAux;
+    logic [3:0]  operacao;
+    logic [26:0] count;
+    logic        busy;
+
+    assign data = digits[3:0];
+    assign pos = 4'd0;
+
+    // Bloco sequencial: atualização do estado
+    always_ff @(posedge clock or posedge reset) begin
+        if (reset) begin
+            EA <= ESPERA_A;
+        end else begin
+            EA <= PE;
+        end
     end
-    else    begin
-        EA <= PE;
-    end
 
-end
+    // Bloco sequencial: lógica da operação
+    always_ff @(posedge clock or posedge reset) begin
+        if (reset) begin        // reset zera tudo, evita de ficar lixo
+            digits   <= 0;
+            regA     <= 0;
+            regB     <= 0;
+            regAux   <= 0;
+            count    <= 0;
+            busy     <= 0;
+            operacao <= 0;
+        end else begin
+            case (EA)
 
-
-logic[26:0]digits;
-logic[26:0]regA, regB;
-logic[3:0] operacao;
-
-always @(posedge clock, posedge reset)begin
-    if (reset) begin
-    digits <= 0;    
-    end
-        else begin
-            case(EA)
-                ESPERA_A:begin
-                if(cmd <= 4'd9)begin digits <= (digits * 10) + cmd; PE <= EA end
-                else begin  
-                regA <= digits;
-                digits <= 0;
-                PE <= OP;
+                ESPERA_A: begin
+                    if (cmd <= 4'd9)
+                        digits <= (digits * 10) + cmd;
+                    else begin
+                        regA   <= digits;
+                        digits <= 0;
+                    end
                 end
-             end
-            
-                OP: begin
-                if(cmd == 4'b1111)begin PE <= ESPERA_A; end
-                operacao <= cmd;
-                PE <= ESPERA_B;
 
+                OP: begin
+                    operacao <= cmd;
                 end
 
                 ESPERA_B: begin
-                if(cmd <= 4'd9)begin digits <= (digits * 10) + cmd; PE <= EA end
-                else begin
-                regB <= digits;
-                digits <= 0;
-                PE <= RESULT;
+                    if (cmd <= 4'd9)
+                        digits <= (digits * 10) + cmd;
+                    else begin
+                        regB   <= digits;
+                        digits <= 0;
+                        busy   <= 0;
+                    end
                 end
-            end
 
                 RESULT: begin
-                    case(operacao)
-                    4'b1010: digits <= regA + regB; PE <= ESPERA_A;
-                    4'b1011: digits <= regA - regB; PE <= ESPERA_A;
-                    4'b1100:  //multiplicaçao tem q ser implementada usando somas sucessivas, sem saco pra fz agr.
-                    default: PE <= ERRO;
-
+                    case (operacao)
+                        4'b1010: digits <= regA + regB; // soma
+                        4'b1011: digits <= regA - regB; // subtração
+                        4'b1100: begin // multiplicação por somas sucessivas
+                            if (!busy) begin
+                                digits <= 0;
+                                count  <= (regA > regB) ? regB : regA;  // ve qual é maior e pega o menor
+                                regAux <= (regA > regB) ? regA : regB;  // pega o maior
+                                busy   <= 1;                            // fica "busy"
+                            end else if (count > 0) begin               // ciclos para ir calculando
+                                digits <= digits + regAux;              // a cada ciclo soma + regAux no digits
+                                count  <= count - 1;                    // diminiu os ciclos
+                            end else
+                                busy <= 0;                              // se não tem mais ciclos, coloca "busy" em false, para poder ir pro proximo estado
+                        end
+                        default: digits <= 27'hBAD; // codigo de erro, gpt que falou
                     endcase
-                    
-
                 end
 
                 ERRO: begin
-                    // sei la o que colocar, teria q mostra erro na tela, nao sei cm faz
-                    PE <= EA;
+                    digits <= 27'hBAD; // codigo de erro, gpt que falou
                 end
 
-             endcase
-
-
-
+            endcase
+        end
     end
-end
 
+    // mudar as posições
+    always_comb begin
+        PE = EA; // default
+        case (EA)
+            ESPERA_A:
+                if (cmd > 4'd9)
+                    PE = OP;
 
+            OP:
+                PE = ESPERA_B;
 
+            ESPERA_B:
+                if (cmd > 4'd9)
+                    PE = RESULT;
 
+            RESULT: begin
+                case (operacao)
+                    4'b1010, 4'b1011:
+                        PE = ESPERA_A;
+                    4'b1100:
+                        if (busy == 0 && count == 0)
+                            PE = ESPERA_A;
+                        else
+                            PE = RESULT;
+                    default:
+                        PE = ERRO;
+                endcase
+            end
+
+            ERRO:
+                PE = ESPERA_A;
+
+            default:
+                PE = ERRO;
+        endcase
+    end
+
+endmodule
 
 
 
