@@ -22,10 +22,7 @@ module calc (
     logic [26:0] regA, regB, regAux;
     logic [3:0]  operacao;
     logic [26:0] count;
-    logic        busy;
 
-    assign data = digits[3:0];
-    assign pos = 4'd0;
 
     // Bloco sequencial: atualização do estado
     always_ff @(posedge clock or posedge reset) begin
@@ -44,17 +41,20 @@ module calc (
             regB     <= 0;
             regAux   <= 0;
             count    <= 0;
-            busy     <= 0;
+            status   <= 2'b11;   // como o status 00 significa erro, 01 ocupado, e 10 pronto. Assumi que 11 não significa nada
             operacao <= 0;
         end else begin
             case (EA)
 
                 ESPERA_A: begin
-                    if (cmd <= 4'd9)
-                        digits <= (digits * 10) + cmd;
-                    else begin
-                        regA   <= digits;
-                        digits <= 0;
+                    status   <= 2'b11; // DEFAULT status
+                    if (cmd <= 4'd9) begin
+                        digits <= (digits * 10) + cmd; // faz o deslocamento e adiciona
+                    end else if (cmd == 4'b1111) begin
+                        digits <= digits / 10; // aqui ta rolando o backspace
+                    end else begin
+                        regA <= digits; // salva no regA
+                        digits <= 0; // zera o digits e consequentemente o display
                     end
                 end
 
@@ -63,30 +63,32 @@ module calc (
                 end
 
                 ESPERA_B: begin
-                    if (cmd <= 4'd9)
-                        digits <= (digits * 10) + cmd;
-                    else begin
-                        regB   <= digits;
+                    if (cmd <= 4'd9) begin
+                        digits <= (digits * 10) + cmd; // Adiciona o novo dígito
+                    end else if (cmd == 4'b1111) begin
+                        digits <= digits / 10; // Remove o último dígito
+                    end else begin
+                        regB <= digits; // Salva o valor em regB
                         digits <= 0;
-                        busy   <= 0;
+                        
                     end
                 end
 
                 RESULT: begin
                     case (operacao)
-                        4'b1010: digits <= regA + regB; // soma
-                        4'b1011: digits <= regA - regB; // subtração
+                        4'b1010: digits <= regA + regB; status <= 2'b10; // soma // status pronto
+                        4'b1011: digits <= regA - regB; status <= 2'b10; // subtração // status pronto
                         4'b1100: begin // multiplicação por somas sucessivas
-                            if (!busy) begin
+                            if (status != 2'b01) begin
                                 digits <= 0;
                                 count  <= (regA > regB) ? regB : regA;  // ve qual é maior e pega o menor
                                 regAux <= (regA > regB) ? regA : regB;  // pega o maior
-                                busy   <= 1;                            // fica "busy"
+                                status   <= 2'b01;                            // status <= ocupado
                             end else if (count > 0) begin               // ciclos para ir calculando
                                 digits <= digits + regAux;              // a cada ciclo soma + regAux no digits
                                 count  <= count - 1;                    // diminiu os ciclos
                             end else
-                                busy <= 0;                              // se não tem mais ciclos, coloca "busy" em false, para poder ir pro proximo estado
+                                status <= 2'b10;                       // se nao tem mais ciclos, coloca "status" em pronto
                         end
                         default: digits <= 27'hBAD; // codigo de erro, gpt que falou
                     endcase
@@ -94,6 +96,7 @@ module calc (
 
                 ERRO: begin
                     digits <= 27'hBAD; // codigo de erro, gpt que falou
+                    status <= 0; //status ERRO
                 end
 
             endcase
@@ -105,95 +108,84 @@ module calc (
         PE = EA; // default
         case (EA)
             ESPERA_A:
-                if (cmd > 4'd9)
-                    PE = OP;
-
+                if (cmd > 4'd9)begin
+                    PE <= OP;
+                end
             OP:
-                PE = ESPERA_B;
+                PE <= ESPERA_B;
 
             ESPERA_B:
-                if (cmd > 4'd9)
-                    PE = RESULT;
-
+                if (cmd == 4'b1110) begin
+                    PE <= RESULT;
+                end else if (cmd > 4'b1010 && cmd < 4'b1110) begin
+                    PE <= ERRO;
+                end
             RESULT: begin
                 case (operacao)
                     4'b1010, 4'b1011:
-                        PE = ESPERA_A;
+                        PE <= ESPERA_A;
                     4'b1100:
-                        if (busy == 0 && count == 0)
-                            PE = ESPERA_A;
-                        else
-                            PE = RESULT;
+                        if (status != 2'b01 && count == 0)begin
+                            PE <= ESPERA_A;
+                        end
+                        else begin
+                            PE <= RESULT;
+                        end
                     default:
-                        PE = ERRO;
+                        PE <= ERRO;
                 endcase
             end
 
             ERRO:
-                PE = ESPERA_A;
+                PE <= ERRO; //fica no erro até dar reset
 
-            default:
-                PE = ERRO;
         endcase
     end
 
-endmodule
+//LÓGICA DE MOSTRAR NO DISPLAY ABAIXO
+// não ta certo ainda cara, ta complicado pensar nesse troço
 
-
-
-/*
-
-
-TENTEI FAZER A LOGICA DE ENVIAR PRO DISPLAY MAS NAO TA CERTO, TA ENVIANDO AS ATUALIZAÇOES DOS DIGITS
-COMBINACIONAMENTE, POREM O QUE ENVIA PRO DISPLAY ESTÁ SEQUENCIAL, O QUE PODE ACARRETAR EM UM DESCOMPASSO
-JÁ QUE TIPO, PODE SER Q EU DIGITE ALGO NO CMD, AI O CLOCK BATE, O INDEX PASSA, E COMO EU DIGITEI ALGO NOVO,
-O QUE ESTAVA NO DIGITS É EMPURRADO PRA ESQUERDA, DAI O DISPLAY MANDA IMPRIMIR DENOVO A MESMA COISA. PORRA
-
-atualizando, o bagulho pra mostra o display é uma desgraça, não sei como fz
-quase terminei a maquina de estados e o troço do display ainda eh um misterio
-
-// pra mapear os valores num vetor, e mandar pro display
 logic [3:0] values [7:0];
+logic [26:0] temp;
+
 
 always_comb begin
-logic [26:0] temp;
 temp = digits;
-
-values[0] <= temp % 10; temp = temp/10;
-values[1] <= temp % 10; temp = temp/10;
-values[2] <= temp % 10; temp = temp/10;
-values[3] <= temp % 10; temp = temp/10;
-values[4] <= temp % 10; temp = temp/10;
-values[5] <= temp % 10; temp = temp/10;
-values[6] <= temp % 10; temp = temp/10;
+// mapeia para o values o que estiver no digits, tudo isso combinacionalmente
+values[0] <= temp % 10; temp = temp/10; 
+values[1] <= temp % 10; temp = temp/10; 
+values[2] <= temp % 10; temp = temp/10; 
+values[3] <= temp % 10; temp = temp/10; 
+values[4] <= temp % 10; temp = temp/10; 
+values[5] <= temp % 10; temp = temp/10; 
+values[6] <= temp % 10; temp = temp/10; 
 values[7] <= temp % 10; 
-
 end
 
-
-// envia pro display, data e pos 
-logic [2:0] idx;
-
-
-always_ff @(posedge clock or posedge reset) begin
-    if (reset or cmd >= 4'b1010) begin
-        idx <= 3'd0;
-    end else begin
-        data <= values[idx];
-        pos  <= idx;
-
-        if (idx == 3'd7)
-            idx <= 3'd0;
-        else
-            idx <= idx + 1;
-    end
+always_ff @ (posedge clock)begin
+pos <= 0;
+pos <= 1;
+pos <= 2;
+pos <= 3;
+pos <= 4;
+pos <= 5;
+pos <= 6;
+pos <= 7;
 end
 
-
-*/
-
-
-
-
+// Lógica combinacional para atualizar tds os displays
+always_comb begin
+    case (pos)
+        4'd0: data = values[0]; // Display 0
+        4'd1: data = values[1]; // Display 1
+        4'd2: data = values[2]; // Display 2
+        4'd3: data = values[3]; // Display 3
+        4'd4: data = values[4]; // Display 4
+        4'd5: data = values[5]; // Display 5
+        4'd6: data = values[6]; // Display 6
+        4'd7: data = values[7]; // Display 7
+        default: data = 4'd0;   // Valor padrão
+    endcase
+end
 
 endmodule
