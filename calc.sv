@@ -22,7 +22,7 @@ module calc (
     logic [26:0] regA, regB, regAux;
     logic [3:0]  operacao;
     logic [26:0] count;
-
+    logic [3:0] display_counter;                // guarda em qual display tá
 
     // Bloco sequencial: atualização do estado
     always_ff @(posedge clock or posedge reset) begin
@@ -37,6 +37,7 @@ module calc (
     always_ff @(posedge clock or posedge reset) begin
         if (reset) begin        // reset zera tudo, evita de ficar lixo
             digits   <= 0;
+            display_counter <= 0;
             regA     <= 0;
             regB     <= 0;
             regAux   <= 0;
@@ -50,11 +51,29 @@ module calc (
                     status   <= 2'b11; // DEFAULT status
                     if (cmd <= 4'd9) begin
                         digits <= (digits * 10) + cmd; // faz o deslocamento e adiciona
+
+                        pos <= display_counter; // coloca pos, que ta ligado com o pos do ctrl na posição atual
+                        data <= cmd;            // coloca a entrada (numero) em data (dig em ctrl) 
+                        display_counter <= display_counter + 1; // passa pra proxima posição
+
                     end else if (cmd == 4'b1111) begin
                         digits <= digits / 10; // aqui ta rolando o backspace
+                        data <= 4'b0;          // apaga o atual
+                        display_counter <= display_counter - 1; // volta um espaço
+                        pos <= display_counter;                 // att pos
                     end else begin
                         regA <= digits; // salva no regA
                         digits <= 0; // zera o digits e consequentemente o display
+                        display_counter <= 0; // zera a posição antes de ir para ESPERA_B
+                        data[0] <= 0; // limpa os displays ao sair de ESPERA_A
+                        data[1] <= 0; 
+                        data[2] <= 0; 
+                        data[3] <= 0; 
+                        data[4] <= 0; 
+                        data[5] <= 0; 
+                        data[6] <= 0; 
+                        data[7] <= 0; 
+
                     end
                 end
 
@@ -65,18 +84,37 @@ module calc (
                 ESPERA_B: begin
                     if (cmd <= 4'd9) begin
                         digits <= (digits * 10) + cmd; // Adiciona o novo dígito
+
+                        pos <= display_counter;
+                        data <= cmd;
+                        display_counter <= display_counter + 1;
+
                     end else if (cmd == 4'b1111) begin
                         digits <= digits / 10; // Remove o último dígito
+
+                        data <= 4'b0;
+                        display_counter <= display_counter - 1;
+                        pos <= display_counter;
+
                     end else begin
                         regB <= digits; // Salva o valor em regB
                         digits <= 0;
-                        
+                        display_counter = 0;
+                        data[0] <= 0; // limpa os displays ao sair de ESPERA_B
+                        data[1] <= 0; 
+                        data[2] <= 0; 
+                        data[3] <= 0; 
+                        data[4] <= 0; 
+                        data[5] <= 0; 
+                        data[6] <= 0; 
+                        data[7] <= 0; 
+                        pos <= display_counter; // coloca pos no inicio para os resultados
                     end
                 end
 
                 RESULT: begin
                     case (operacao)
-                        4'b1010: digits <= regA + regB; status <= 2'b10; // soma // status pronto
+                        4'b1010: digits <= regA + regB; status <= 2'b10; // soma // status pronto //não precisa de begin e end?, usa mais de uma linha
                         4'b1011: digits <= regA - regB; status <= 2'b10; // subtração // status pronto
                         4'b1100: begin // multiplicação por somas sucessivas
                             if (status != 2'b01) begin
@@ -92,6 +130,17 @@ module calc (
                         end
                         default: digits <= 27'hBAD; // codigo de erro, gpt que falou
                     endcase
+
+                    if (status == 2'b10) begin // se ta pronto, mostra o resultado, fazer em mais ciclos fica menor mas gasta mais ciclos
+                        data[0] <= digits[3:0]; 
+                        data[1] <= digits[7:4]; 
+                        data[2] <= digits[11:8]; 
+                        data[3] <= digits[15:12]; 
+                        data[4] <= digits[19:16]; 
+                        data[5] <= digits[23:20]; 
+                        data[6] <= digits[27:24]; 
+                        data[7] <= 0;
+                    end 
                 end
 
                 ERRO: begin
@@ -111,6 +160,7 @@ module calc (
                 if (cmd > 4'd9)begin
                     PE <= OP;
                 end
+                else PE <= ESPERA_A;
             OP:
                 PE <= ESPERA_B;
 
@@ -141,51 +191,5 @@ module calc (
 
         endcase
     end
-
-//LÓGICA DE MOSTRAR NO DISPLAY ABAIXO
-// não ta certo ainda cara, ta complicado pensar nesse troço
-
-logic [3:0] values [7:0];
-logic [26:0] temp;
-
-
-always_comb begin
-temp = digits;
-// mapeia para o values o que estiver no digits, tudo isso combinacionalmente
-values[0] <= temp % 10; temp = temp/10; 
-values[1] <= temp % 10; temp = temp/10; 
-values[2] <= temp % 10; temp = temp/10; 
-values[3] <= temp % 10; temp = temp/10; 
-values[4] <= temp % 10; temp = temp/10; 
-values[5] <= temp % 10; temp = temp/10; 
-values[6] <= temp % 10; temp = temp/10; 
-values[7] <= temp % 10; 
-end
-
-always_ff @ (posedge clock)begin
-pos <= 0;
-pos <= 1;
-pos <= 2;
-pos <= 3;
-pos <= 4;
-pos <= 5;
-pos <= 6;
-pos <= 7;
-end
-
-// Lógica combinacional para atualizar tds os displays
-always_comb begin
-    case (pos)
-        4'd0: data = values[0]; // Display 0
-        4'd1: data = values[1]; // Display 1
-        4'd2: data = values[2]; // Display 2
-        4'd3: data = values[3]; // Display 3
-        4'd4: data = values[4]; // Display 4
-        4'd5: data = values[5]; // Display 5
-        4'd6: data = values[6]; // Display 6
-        4'd7: data = values[7]; // Display 7
-        default: data = 4'd0;   // Valor padrão
-    endcase
-end
 
 endmodule
