@@ -157,4 +157,57 @@ module calc (
         endcase
     end
 
+//LÓGICA PARA OS DISPLAYS
+
+logic [3:0] values [7:0];
+logic [26:0] temp;
+
+always_comb begin
+
+    case (pos)
+        4'd0: data = values[0]; // Display 0
+        4'd1: data = values[1]; // Display 1
+        4'd2: data = values[2]; // Display 2
+        4'd3: data = values[3]; // Display 3
+        4'd4: data = values[4]; // Display 4
+        4'd5: data = values[5]; // Display 5
+        4'd6: data = values[6]; // Display 6
+        4'd7: data = values[7]; // Display 7
+        default: data = 4'd0;   // Valor padrão
+ 
+    endcase
+end
+
+ 
+always_comb begin
+temp = digits;
+// mapeia para o values o que estiver no digits, tudo isso combinacionalmente
+ 
+values[0] = temp % 10; temp = temp/10; 
+values[1] = temp % 10; temp = temp/10; 
+values[2] = temp % 10; temp = temp/10; 
+values[3] = temp % 10; temp = temp/10; 
+values[4] = temp % 10; temp = temp/10; 
+values[5] = temp % 10; temp = temp/10; 
+values[6] = temp % 10; temp = temp/10; 
+values[7] = temp % 10; 
+
+end
+
+// vai demora 7 clocks pra mostra o display td, unico modo q achei de fz
+always_ff @(posedge clock or posedge reset) begin
+    if (reset)begin
+        pos <= 0;
+    end
+    else if (pos>7)begin
+        pos <= 0;
+    end
+    else begin
+        pos <= pos + 1;
+    end
+end
+
+
+
+
 endmodule
