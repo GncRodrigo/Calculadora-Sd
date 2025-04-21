@@ -4,7 +4,7 @@ module ctrl(
   input logic[3:0] dig,
   input logic[3:0] pos,
 
-  output [7:0]displays[7:0]; // 8 displays, cada um com 8 segmentos, tem o dp
+  output [7:0]displays[7:0] // 8 displays, cada um com 8 segmentos, tem o dp
 );
 
   logic[8][3:0] data = 0;
