@@ -5,7 +5,9 @@ module calc (
 
     output logic [1:0] status,
     output logic [3:0] data,
-    output logic [3:0] pos
+    output logic [3:0] pos,
+    output logic [26:0] digits
+
 );
 
     localparam ESPERA_A = 3'b000;
@@ -18,7 +20,6 @@ module calc (
     logic [2:0] PE;
 
 
-    logic [26:0] digits;
     logic [26:0] regA, regB, regAux;
     logic [3:0]  operacao;
     logic [26:0] count;

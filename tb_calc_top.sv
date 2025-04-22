@@ -10,38 +10,33 @@ module tb_calc_top;
   // outs
   logic [6:0] displays [7:0];
   logic [1:0] status;
+  logic [26:0] digits;
   
   calc_top calc_top (
     .clock(clock),
     .reset(reset),
     .cmd(cmd),
     .displays(displays),
-    .status(status)
+    .status(status),
+    .digits(digits)
     );
 
   always #1 clock = ~clock; 
 
   initial begin
-    reset = 1; #4
-    reset = 0; #4 
+    reset = 1; #4;
+    reset = 0; #4; 
 
     // 0
 
-    cmd = 4'd1; #2; 
-    cmd = 4'd2; #2; 
-    cmd = 4'd3; #2; 
-    cmd = 4'd4; #2; 
    
     // '+'
-    cmd = 4'b1010; #2; // -6 em decimal
+   
 
-    cmd = 4'd1; #2; 
-    cmd = 4'd2; #2; 
-    cmd = 4'd3; #2; 
-    cmd = 4'd4; #2; 
+  
 
     // '='
-    cmd = 4'b1110; #2; // -2 em decimal
+    
 
   end  
 

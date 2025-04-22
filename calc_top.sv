@@ -4,7 +4,8 @@ module calc_top(
     input logic clock,
     // aqui nesses displays sera possivel verificar os numeros da calc
     output logic [6:0] displays [7:0],
-    output logic [1:0] status
+    output logic [1:0] status,
+    output logic [26:0] digits
 );
 
     logic [3:0] data;
@@ -16,7 +17,8 @@ calc calculadera (
     .cmd(cmd), 
     .status(status),
     .data(data), 
-    .pos(pos)
+    .pos(pos),
+    .digits(digits)
 );
 
 ctrl controladoro (
