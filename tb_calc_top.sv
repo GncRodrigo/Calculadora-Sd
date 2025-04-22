@@ -27,23 +27,24 @@ module tb_calc_top;
     reset = 0; #4 
 
     // 0
-   
+
     cmd = 4'd1; #2; 
     cmd = 4'd2; #2; 
     cmd = 4'd3; #2; 
     cmd = 4'd4; #2; 
    
-
     // '+'
-    cmd = 4'b1010; #2; 
+    cmd = 4'b1010; #2; // -6 em decimal
 
     cmd = 4'd1; #2; 
     cmd = 4'd2; #2; 
     cmd = 4'd3; #2; 
     cmd = 4'd4; #2; 
 
-    cmd = 4'b1110; #2; 
-    
+    // '='
+    cmd = 4'b1110; #2; // -2 em decimal
+    cmd = 4'd0; // zera cmd, ś (descobri que dá pra colocar acento no s, que pica), fica "mais bonito"
+
   end  
 
 
