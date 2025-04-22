@@ -3,7 +3,7 @@ module calc_top(
     input logic reset,
     input logic clock,
     // aqui nesses displays sera possivel verificar os numeros da calc
-    output logic [7:0] displays [7:0],
+    output logic [6:0] displays [7:0],
     output logic [1:0] status
 );
 

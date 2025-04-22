@@ -8,15 +8,15 @@ module calc (
     output logic [3:0] pos
 );
 
-    typedef enum logic [2:0] {
-        ESPERA_A = 3'b000,
-        ESPERA_B = 3'b001,
-        OP       = 3'b010,
-        RESULT   = 3'b011,
-        ERRO     = 3'b100
-    } estados_calc;
+    localparam ESPERA_A = 3'b000;
+    localparam ESPERA_B = 3'b001;
+    localparam OP       = 3'b010;
+    localparam RESULT   = 3'b011;
+    localparam ERRO     = 3'b100;
 
-    estados_calc EA, PE;
+    logic [2:0] EA;
+    logic [2:0] PE;
+
 
     logic [26:0] digits;
     logic [26:0] regA, regB, regAux;
@@ -41,12 +41,13 @@ module calc (
             regB     <= 0;
             regAux   <= 0;
             count    <= 0;
-            status   <= 2'b11;   // como o status 00 significa erro, 01 ocupado, e 10 pronto. Assumi que 11 não significa nada
+            status   <= 2'b10;   // como o status 00 significa erro, 01 ocupado, e 10 pronto. O STATUS PRONTO SIGNIFICA: PRONTO PARA RECEBER COMANDO DO CMD
             operacao <= 0;
-'        end else begin
+            end else begin
             case (EA)
 
                 ESPERA_A: begin
+                    if( status == 10) begin
                     status   <= 2'b11; // DEFAULT status
                     if (cmd <= 4'd9) begin
                         digits <= (digits * 10) + cmd; // faz o deslocamento e adiciona
@@ -62,12 +63,16 @@ module calc (
                       
                     end
                 end
+                end
 
                 OP: begin
+                    if( status == 10) begin
                     operacao <= cmd;
+                    end
                 end
 
                 ESPERA_B: begin
+                    if( status == 10) begin
                     if (cmd <= 4'd9) begin
                         digits <= (digits * 10) + cmd; // Adiciona o novo dígito
 
@@ -82,34 +87,43 @@ module calc (
                         digits <= 0;
                         
                     end
+                    end
                 end
 
                 RESULT: begin
                     case (operacao)
-                        4'b1010: begin digits <= regA + regB; status <= 2'b10; end // soma // status pronto 
-                        4'b1011: begin digits <= regA - regB; status <= 2'b10; end // subtração // status pronto
-                        4'b1100: begin // multiplicação por somas sucessivas
-                            if (status != 2'b01) begin
-                                digits <= 0;
-                                count  <= (regA > regB) ? regB : regA;  // ve qual é maior e pega o menor
-                                regAux <= (regA > regB) ? regA : regB;  // pega o maior
-                                status   <= 2'b01;                            // status <= ocupado
-                            end else if (count > 0) begin               // ciclos para ir calculando
-                                digits <= digits + regAux;              // a cada ciclo soma + regAux no digits
-                                count  <= count - 1;                    // diminiu os ciclos
-                            end else
-                                status <= 2'b10;                       // se nao tem mais ciclos, coloca "status" em pronto
+                        4'b1010: begin 
+                            digits <= regA + regB;  
+                            status <= 2'b01; // Soma, status ocupado
                         end
-                        default: digits <= 27'hBAD; // codigo de erro, gpt que falou
+                        4'b1011: begin 
+                            digits <= regA - regB;  
+                            status <= 2'b01; // Subtração, status ocupado
+                        end
+                        4'b1100: begin // Multiplicação por somas sucessivas
+                            if (status == 2'b01) begin
+                                digits <= 0;
+                                count  <= (regA > regB) ? regB : regA;  // Define o menor valor como contador
+                                regAux <= (regA > regB) ? regA : regB;  // Define o maior valor
+                            end else if (count > 0) begin
+                                digits <= digits + regAux; // Soma sucessiva
+                                count  <= count - 1;       // Decrementa o contador
+                            end else if (count == 0) begin
+                                operacao <= 0;
+                                status <= 2'b10; // Pronto após a multiplicação
+                            end
+                        end
+                        default: begin
+                            digits <= 27'd0; 
+                            status <= 2'b00; // Erro
+                        end
                     endcase
 
-                    if (status == 2'b10) begin // se ta pronto, mostra o resultado, fazer em mais ciclos fica menor mas gasta mais ciclos
-                    
-                    end 
+                
                 end
 
                 ERRO: begin
-                    digits <= 27'hBAD; // codigo de erro, gpt que falou
+                    digits <= 27'd0; // codigo de erro
                     status <= 0; //status ERRO
                 end
 
@@ -123,36 +137,37 @@ module calc (
         case (EA)
             ESPERA_A:
                 if (cmd > 4'd9)begin
-                    PE <= OP;
+                    PE = OP;
                 end
-                else PE <= ESPERA_A;
+                else begin PE = ESPERA_A;
+                end
             OP:
-                PE <= ESPERA_B;
+                PE = ESPERA_B;
 
             ESPERA_B:
                 if (cmd == 4'b1110) begin
-                    PE <= RESULT;
+                    PE = RESULT;
                 end else if (cmd > 4'b1010 && cmd < 4'b1110) begin
-                    PE <= ERRO;
+                    PE = ERRO;
                 end
             RESULT: begin
                 case (operacao)
                     4'b1010, 4'b1011:
-                        PE <= ESPERA_A;
+                        PE = ESPERA_A;
                     4'b1100:
                         if (status != 2'b01 && count == 0)begin
-                            PE <= ESPERA_A;
+                            PE = ESPERA_A;
                         end
                         else begin
-                            PE <= RESULT;
+                            PE = RESULT;
                         end
                     default:
-                        PE <= ERRO;
+                        PE = ERRO;
                 endcase
             end
 
             ERRO:
-                PE <= ERRO; //fica no erro até dar reset
+                PE = ERRO; //fica no erro até dar reset
 
         endcase
     end
@@ -163,19 +178,22 @@ logic [3:0] values [7:0];
 logic [26:0] temp;
 
 always_comb begin
-
-    case (pos)
-        4'd0: data = values[0]; // Display 0
-        4'd1: data = values[1]; // Display 1
-        4'd2: data = values[2]; // Display 2
-        4'd3: data = values[3]; // Display 3
-        4'd4: data = values[4]; // Display 4
-        4'd5: data = values[5]; // Display 5
-        4'd6: data = values[6]; // Display 6
-        4'd7: data = values[7]; // Display 7
-        default: data = 4'd0;   // Valor padrão
- 
-    endcase
+    if (status == 00 || (status == 2'b01 && operacao != 4'b1100)) begin
+        // Exibe os valores apenas se o status for ocupado, exceto durante a multi
+        case (pos)
+            4'd0: data = values[0]; // Display 0
+            4'd1: data = values[1]; // Display 1
+            4'd2: data = values[2]; // Display 2
+            4'd3: data = values[3]; // Display 3
+            4'd4: data = values[4]; // Display 4
+            4'd5: data = values[5]; // Display 5
+            4'd6: data = values[6]; // Display 6
+            4'd7: data = values[7]; // Display 7
+            default: data = 4'd0;   // valor padrao
+        endcase
+    end else begin
+        data = 4'd0; // mostra 0 durante a multiplicacao
+    end
 end
 
  
@@ -194,20 +212,21 @@ values[7] = temp % 10;
 
 end
 
-// vai demora 7 clocks pra mostra o display td, unico modo q achei de fz
+// vai demora 7 clocks pra mostra o display td
 always_ff @(posedge clock or posedge reset) begin
-    if (reset)begin
+    if (reset) begin
         pos <= 0;
-    end
-    else if (pos>7)begin
+        
+    end else if (pos > 7) begin
+        // Reseta pos após todos os displays serem atualizados
         pos <= 0;
-    end
-    else begin
+    end else if (status == 00 || (status == 2'b01 && operacao != 4'b1100)) begin
+        // Incrementa pos enquanto ocupado
         pos <= pos + 1;
+    end else if (status == 2'b10) begin
+        // Reseta pos quando o status muda para pronto
+        pos <= 0;
     end
 end
-
-
-
 
 endmodule

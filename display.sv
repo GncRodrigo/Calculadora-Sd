@@ -9,7 +9,7 @@ module display(
   output logic g,
   output logic dp
 );
-
+  
   // "f" é a função que mapeia as entras em saídas. Neste caso,
   // é declarado como um vetor de 8 posições (8 segmentos do display), contendo
   // 8 bits cada (um para cada possibilidade de dígito a ser mostrado)
