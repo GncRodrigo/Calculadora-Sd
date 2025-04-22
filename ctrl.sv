@@ -4,7 +4,7 @@ module ctrl(
   input logic[3:0] dig,
   input logic[3:0] pos,
 
-  output [6:0]displays[7:0] // 8 displays, cada um com 7 segmentos, dp que vá pro inferno
+  output logic [6:0] displays [7:0] // 8 displays, cada um com 7 segmentos, dp que vá pro inferno
 );
 
   logic[8][3:0] data = 0;
@@ -24,14 +24,14 @@ module ctrl(
   always @(posedge clock, negedge reset) begin
 
     if(reset == 1) begin
-      data[0] = 0;
-      data[1] = 0;
-      data[2] = 0;
-      data[3] = 0;
-      data[4] = 0;
-      data[5] = 0;
-      data[6] = 0;
-      data[7] = 0;
+      data[0] <= 0;
+      data[1] <= 0;
+      data[2] <= 0;
+      data[3] <= 0;
+      data[4] <= 0;
+      data[5] <= 0;
+      data[6] <= 0;
+      data[7] <= 0;
     end else begin
       if(pos < 8 && dig < 10) begin
         data[pos] <= dig;

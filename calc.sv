@@ -47,7 +47,7 @@ module calc (
             case (EA)
 
                 ESPERA_A: begin
-                    if( status == 10) begin
+                    if( status == 2'b10) begin
                     status   <= 2'b11; // DEFAULT status
                     if (cmd <= 4'd9) begin
                         digits <= (digits * 10) + cmd; // faz o deslocamento e adiciona
@@ -66,13 +66,13 @@ module calc (
                 end
 
                 OP: begin
-                    if( status == 10) begin
+                    if( status == 2'b10) begin
                     operacao <= cmd;
                     end
                 end
 
                 ESPERA_B: begin
-                    if( status == 10) begin
+                    if( status == 2'b10) begin
                     if (cmd <= 4'd9) begin
                         digits <= (digits * 10) + cmd; // Adiciona o novo dígito
 
@@ -124,7 +124,7 @@ module calc (
 
                 ERRO: begin
                     digits <= 27'd0; // codigo de erro
-                    status <= 0; //status ERRO
+                    status <= 2'b00; //status ERRO
                 end
 
             endcase
