@@ -33,6 +33,8 @@ module calc (
         end
     end
 
+    logic prontoB = 0; // flag para indicar que o segundo número foi digitado (copilot descobriu rapidão)
+
     // Bloco sequencial: lógica da operação
     always_ff @(posedge clock or posedge reset) begin
         if (reset) begin        // reset zera tudo, evita de ficar lixo
@@ -44,48 +46,44 @@ module calc (
             status   <= 2'b10;   // como o status 00 significa erro, 01 ocupado, e 10 pronto. O STATUS PRONTO SIGNIFICA: PRONTO PARA RECEBER COMANDO DO CMD
             operacao <= 0;
             end else begin
+
             case (EA)
 
                 ESPERA_A: begin
                     if( status == 2'b10) begin
-                    if (cmd <= 4'd9) begin
-                        digits <= (digits * 10) + cmd; // faz o deslocamento e adiciona
+                        if (cmd <= 4'd9) begin
+                            digits <= (digits * 10) + cmd; // faz o deslocamento e adiciona
 
                        
-                    end else if (cmd == 4'b1111) begin
-                        digits <= digits / 10; // aqui ta rolando o backspace
+                        end else if (cmd == 4'b1111) begin
+                            digits <= digits / 10; // aqui ta rolando o backspace
                      
-                    end else begin
-                        regA <= digits; // salva no regA
-                        digits <= 0; // zera o digits e consequentemente o display
-                       
-                      
-                    end
+                        end 
                 end
                 end
 
                 OP: begin
+                    regA <= digits; // Salva o valor em regA
+                    digits <= 0;
                     if( status == 2'b10) begin
                     operacao <= cmd;
                     end
                 end
 
                 ESPERA_B: begin
+                    prontoB <= 0;
+
                     if( status == 2'b10) begin
-                    if (cmd <= 4'd9) begin
-                        digits <= (digits * 10) + cmd; // Adiciona o novo dígito
+                        if (cmd <= 4'd9) begin
+                            digits <= (digits * 10) + cmd; // Adiciona o novo dígito
+                        end else if (cmd == 4'b1111) begin
+                         digits <= digits / 10; // Remove o último dígito
 
-
-                    end else if (cmd == 4'b1111) begin
-                        digits <= digits / 10; // Remove o último dígito
-
-                
-
-                    end else begin
-                        regB <= digits; // Salva o valor em regB
-                        digits <= 0;
-                        
-                    end
+                            end else begin
+                                regB <= digits; // Salva o valor em regB
+                                digits <= 0;
+                                prontoB <= 1; // Indica que o segundo número foi digitado (to surpreso com o copilot, da medo)
+                            end
                     end
                 end
 
@@ -144,11 +142,18 @@ module calc (
                 PE = ESPERA_B;
 
             ESPERA_B:
-                if (cmd == 4'b1110) begin
+            if (prontoB) begin
+                if (cmd == 4'b1110) 
+                begin
                     PE = RESULT;
-                end else if (cmd > 4'b1010 && cmd < 4'b1110) begin
+                end 
+
+                else if (cmd > 4'b1010 && cmd < 4'b1110) 
+                begin
                     PE = ERRO;
                 end
+                
+            end
             RESULT: begin
                 case (operacao)
                     4'b1010, 4'b1011:
