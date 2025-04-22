@@ -7,7 +7,6 @@ vlog -work work ctrl.sv
 vlog -work work calc.sv
 vlog -work work calc_top.sv
 vlog -work work tb_calc_top.sv
-add wave -position insertpoint sim:/tb_calc_top/digits
 
 
 vsim -voptargs=+acc work.tb_calc_top
