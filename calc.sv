@@ -183,7 +183,7 @@ logic [3:0] values [7:0];
 logic [26:0] temp;
 
 always_comb begin
-    if (status == 00 || (status == 2'b01 && operacao != 4'b1100)) begin
+    if (status == 0 || (status == 2'b01 && operacao != 4'b1100)) begin
         // Exibe os valores apenas se o status for ocupado, exceto durante a multi
         case (pos)
             4'd0: data = values[0]; // Display 0

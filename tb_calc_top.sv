@@ -28,8 +28,8 @@ module tb_calc_top;
     reset = 0; #4; 
 
     // 0
-
-   
+    cmd = 4'b0001; #2;
+   // é só pra mostrar o 1 indo
     // '+'
    
 
