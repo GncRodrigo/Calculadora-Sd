@@ -32,7 +32,8 @@ module calc (
             EA <= PE;
         end
     end
-2'b01
+
+    // Bloco sequencial: lógica da operação
     always_ff @(posedge clock or posedge reset) begin
         if (reset) begin        // reset zera tudo, evita de ficar lixo
             digits   <= 0;
