@@ -32,8 +32,7 @@ module calc (
             EA <= PE;
         end
     end
-
-    // Bloco sequencial: lógica da operação
+2'b01
     always_ff @(posedge clock or posedge reset) begin
         if (reset) begin        // reset zera tudo, evita de ficar lixo
             digits   <= 0;
@@ -48,7 +47,6 @@ module calc (
 
                 ESPERA_A: begin
                     if( status == 2'b10) begin
-                    status   <= 2'b11; // DEFAULT status
                     if (cmd <= 4'd9) begin
                         digits <= (digits * 10) + cmd; // faz o deslocamento e adiciona
 

@@ -7,7 +7,6 @@ module tb_calc_top;
   logic reset;
   logic [3:0] cmd;
   
-
   // outs
   logic [6:0] displays [7:0];
   logic [1:0] status;
@@ -43,7 +42,6 @@ module tb_calc_top;
 
     // '='
     cmd = 4'b1110; #2; // -2 em decimal
-    cmd = 4'd0; // zera cmd, ś (descobri que dá pra colocar acento no s, que pica), fica "mais bonito"
 
   end  
 
