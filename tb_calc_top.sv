@@ -24,19 +24,18 @@ module tb_calc_top;
   // Geração de clock
   always #2 clock = ~clock;
 
-  initial begin
 
   reset = 1; #2;
   reset = 0; #25;
 
-  if (status == 2'b01)begin cmd = 4'd1;    end  #50;
-  if (status == 2'b01)begin cmd = 4'd2;    end  #50;
-  if (status == 2'b01)begin cmd = 4'b1010; end  #50;
-  if (status == 2'b01)begin cmd = 4'd3;   end   #50;
-  if (status == 2'b01)begin cmd = 4'b1110; end  #50;
+  initial begin
 
-  $finish;
-
+    cmd = 4'd1; #20;
+    cmd = 4'b1010; #20;
+    cmd = 4'd3; #20;
+    cmd = 4'b1110; #20;
+  
+  
   end
 
 
