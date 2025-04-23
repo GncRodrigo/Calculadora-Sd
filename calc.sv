@@ -134,7 +134,7 @@ module calc (
             endcase
                 //LÓGICA PARA OS DISPLAYS
                // MEXEDOR DA POSIÇÃO
-                 if (pos == 4'd7) begin
+                 if (pos > 4'd7) begin
                  // Reseta pos após todos os displays serem atualizados
                         pos <= 4'd0;
                         status <= 2'b10;
@@ -166,7 +166,7 @@ module calc (
                     4'd7: data = values[7]; // Display 7
                     default: data = 4'd0;   // valor padrao
                     endcase
-                    $display("pos = %d", pos);
+                    $display("pos = %d, digits = %d", pos, digits);
                     
             
                 // Incrementa pos enquanto ocupado
