@@ -5,9 +5,8 @@ module calc (
 
     output logic [1:0] status,
     output logic [3:0] data,
-    output logic [3:0] pos,
+    output logic [3:0] pos
     
-
 );
 
     localparam ESPERA_A = 3'b000;
@@ -18,7 +17,7 @@ module calc (
 
     logic [2:0] EA;
     logic [2:0] PE;
-    logic [26:0] digits
+    logic [26:0] digits;
 
     logic [26:0] regA, regB, regAux;
     logic [3:0]  operacao;
@@ -133,6 +132,7 @@ module calc (
                 end
 
             endcase
+                //LÓGICA PARA OS DISPLAYS
                // MEXEDOR DA POSIÇÃO
                  if (pos == 4'd7) begin
                  // Reseta pos após todos os displays serem atualizados
@@ -169,7 +169,7 @@ module calc (
             
                 // Incrementa pos enquanto ocupado
                     pos <= pos + 1;
-                    
+
                 end 
         end
 
@@ -224,17 +224,6 @@ module calc (
 
         endcase
     end
-
-//LÓGICA PARA OS DISPLAYS
-
-
-
-always_ff @(posedge clock or posedge reset) begin
-    if (status == 0 || (status == 2'b01 && operacao != 4'b1100)) begin
-
-end
-
-
 
 
 
