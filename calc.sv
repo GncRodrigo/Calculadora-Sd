@@ -152,7 +152,7 @@ module calc (
                 end
                 else PE = ESPERA_A;
             end
-            OP: if(status == 4'b10) PE = ESPERA_B;  // ele não espera
+            OP: if(status == 4'b10 && cmd < 4'b1010) PE = ESPERA_B;  // ele não espera
                 else PE = OP;
             ESPERA_B:
             
