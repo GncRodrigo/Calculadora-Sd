@@ -46,7 +46,7 @@ module calc (
             status   <= 2'b01;   // como o status 00 significa erro, 01 ocupado, e 10 pronto. O STATUS PRONTO SIGNIFICA: PRONTO PARA RECEBER COMANDO DO CMD
             operacao <= 0;
             pos <= 0;
-            end else (clock) begin
+            end else if(clock) begin
 
             case (EA)
 
