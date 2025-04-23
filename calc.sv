@@ -23,7 +23,7 @@ module calc (
     logic [26:0] regA, regB, regAux;
     logic [3:0]  operacao;
     logic [26:0] count;
-    logic prontoB = 0; // flag para indicar que o segundo número foi digitado (copilot descobriu rapidão)
+    
 
 
     // Bloco sequencial: atualização do estado
@@ -43,7 +43,7 @@ module calc (
             regB     <= 0;
             regAux   <= 0;
             count    <= 0;
-            status   <= 2'b0;   // como o status 00 significa erro, 01 ocupado, e 10 pronto. O STATUS PRONTO SIGNIFICA: PRONTO PARA RECEBER COMANDO DO CMD
+            status   <= 2'b01;   // como o status 00 significa erro, 01 ocupado, e 10 pronto. O STATUS PRONTO SIGNIFICA: PRONTO PARA RECEBER COMANDO DO CMD
             operacao <= 0;
             end else begin
 
@@ -53,9 +53,11 @@ module calc (
                     if( status == 2'b10) begin
                         if (cmd <= 4'd9) begin
                             digits <= (digits * 10) + cmd; // faz o deslocamento e adiciona
+                            status <= 2'b01;
 
                         end else if (cmd == 4'b1111) begin
                             digits <= digits / 10; // aqui ta rolando o backspace
+                            status <= 2'b01;
                         end 
                 end
                 end
@@ -66,26 +68,30 @@ module calc (
                     if( status == 2'b10) begin
                     operacao <= cmd;
                     end
+                    status <= 2'b01;
                 end
 
                 ESPERA_B: begin
-                    prontoB <= 0;
+                    
 
                     if( status == 2'b10) begin
                         if (cmd <= 4'd9) begin
                             digits <= (digits * 10) + cmd; // Adiciona o novo dígito
+                            status <= 2'b01;
                         end else if (cmd == 4'b1111) begin
-                         digits <= digits / 10; // Remove o último dígito
-
-                            end else begin
+                            digits <= digits / 10; // Remove o último dígito
+                            status <= 2'b01;
+                            end 
+                            else if(cmd == 4'b1110) begin // se for igual result salva e faz tudo
                                 regB <= digits; // Salva o valor em regB
                                 digits <= 0;
-                                prontoB <= 1; // Indica que o segundo número foi digitado (to surpreso com o copilot, da medo)
+                                status <= 2'b01;
                             end
                     end
                 end
 
                 RESULT: begin
+                    if (status == 2'b10) begin
                     case (operacao)
                         4'b1010: begin 
                             digits <= regA + regB;  
@@ -96,8 +102,8 @@ module calc (
                             status <= 2'b01; // Subtração, status ocupado
                         end
                         4'b1100: begin // Multiplicação por somas sucessivas
-                            if (status == 2'b01) begin
-                                digits <= 0;
+                            status <= 2'b01;
+                            if ((status == 2'b01) && (count == 0)) begin
                                 count  <= (regA > regB) ? regB : regA;  // Define o menor valor como contador
                                 regAux <= (regA > regB) ? regA : regB;  // Define o maior valor
                             end else if (count > 0) begin
@@ -105,7 +111,7 @@ module calc (
                                 count  <= count - 1;       // Decrementa o contador
                             end else if (count == 0) begin
                                 operacao <= 0;
-                                status <= 2'b10; // Pronto após a multiplicação
+                                status <= 2'b01; // Ocupado após mult
                             end
                         end
                         default: begin
@@ -113,7 +119,7 @@ module calc (
                             status <= 2'b00; // Erro
                         end
                     endcase
-
+                    end
                 
                 end
 
@@ -126,44 +132,47 @@ module calc (
     end
 
     // mudar as posições
-    always_comb begin
-        PE = EA; // default
+    always_ff @(posedge clock) begin
+       
         case (EA)
-            ESPERA_A:
-                if (cmd > 4'd9)begin
+            ESPERA_A: begin
+                if ((cmd > 4'd9)&&(cmd < 4'd11))begin
                     PE = OP;
                 end
-                else begin PE = ESPERA_A;
-                end
-            OP:
-                PE = ESPERA_B;
+                else PE = ESPERA_A;
+            end
+            OP: PE = ESPERA_B;
 
             ESPERA_B:
-            if (prontoB) begin
+            
                 if (cmd == 4'b1110) 
                 begin
                     PE = RESULT;
                 end 
 
-                else if (cmd > 4'b1010 && cmd < 4'b1110) 
+                else if (cmd >= 4'b1010 && cmd < 4'b1110) 
                 begin
                     PE = ERRO;
                 end
+                else PE = ESPERA_B;
                 
-            end
             RESULT: begin
                 case (operacao)
-                    4'b1010, 4'b1011:
-                        PE = ESPERA_A;
-                    4'b1100:
+                    4'b1010: PE = ESPERA_A;
+
+                    4'b1011: PE = ESPERA_A;
+
+                    4'b1100:begin
                         if (status != 2'b01 && count == 0)begin
                             PE = ESPERA_A;
                         end
                         else begin
                             PE = RESULT;
                         end
+                    end
                     default:
                         PE = ERRO;
+                
                 endcase
             end
 
@@ -178,7 +187,7 @@ module calc (
 logic [7:0] values [3:0];
 logic [26:0] temp;
 
-always_comb begin
+always_ff @(posedge clock or posedge reset) begin
     if (status == 0 || (status == 2'b01 && operacao != 4'b1100)) begin
         // Exibe os valores apenas se o status for ocupado, exceto durante a multi
         case (pos)
