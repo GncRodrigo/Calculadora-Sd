@@ -6,7 +6,7 @@ module calc (
     output logic [1:0] status,
     output logic [3:0] data,
     output logic [3:0] pos,
-    output logic [26:0] digits
+    
 
 );
 
@@ -18,11 +18,14 @@ module calc (
 
     logic [2:0] EA;
     logic [2:0] PE;
-
+    logic [26:0] digits
 
     logic [26:0] regA, regB, regAux;
     logic [3:0]  operacao;
     logic [26:0] count;
+
+    logic [7:0] values [3:0];
+    logic [26:0] temp;
     
 
 
@@ -45,7 +48,7 @@ module calc (
             count    <= 0;
             status   <= 2'b01;   // como o status 00 significa erro, 01 ocupado, e 10 pronto. O STATUS PRONTO SIGNIFICA: PRONTO PARA RECEBER COMANDO DO CMD
             operacao <= 0;
-            pos <= -1;
+            pos <= 0;
             end else if(clock) begin
 
             case (EA)
@@ -133,14 +136,42 @@ module calc (
                // MEXEDOR DA POSIÇÃO
                  if (pos == 4'd7) begin
                  // Reseta pos após todos os displays serem atualizados
-                        pos <= -1;
+                        pos <= 0;
                         status <= 2'b10;
                 end else if (status == 00 || (status == 2'b01 && operacao != 4'b1100)) begin
+                
+                
+                 temp = digits;
+                // mapeia para o values o que estiver no digits, tudo isso combinacionalmente
+ 
+                values[0] = temp % 10; temp = temp/10; 
+                values[1] = temp % 10; temp = temp/10; 
+                values[2] = temp % 10; temp = temp/10; 
+                values[3] = temp % 10; temp = temp/10; 
+                values[4] = temp % 10; temp = temp/10; 
+                values[5] = temp % 10; temp = temp/10; 
+                values[6] = temp % 10; temp = temp/10; 
+                values[7] = temp % 10; 
+
+                // Exibe os valores apenas se o status for ocupado, exceto durante a multi
+                 case (pos)
+                    4'd0: data = values[0]; // Display 0
+                    4'd1: data = values[1]; // Display 1
+                    4'd2: data = values[2]; // Display 2
+                    4'd3: data = values[3]; // Display 3
+                    4'd4: data = values[4]; // Display 4
+                    4'd5: data = values[5]; // Display 5
+                    4'd6: data = values[6]; // Display 6
+                    4'd7: data = values[7]; // Display 7
+                    default: data = 4'd0;   // valor padrao
+                    endcase
+                    end 
+            
                 // Incrementa pos enquanto ocupado
-                        pos <= pos + 1;
+                    pos <= pos + 1;
+                    
                 end 
         end
-    end
 
     // mudar as posições
     always_ff @(posedge clock) begin
@@ -196,44 +227,14 @@ module calc (
 
 //LÓGICA PARA OS DISPLAYS
 
-logic [7:0] values [3:0];
-logic [26:0] temp;
+
 
 always_ff @(posedge clock or posedge reset) begin
     if (status == 0 || (status == 2'b01 && operacao != 4'b1100)) begin
-        // Exibe os valores apenas se o status for ocupado, exceto durante a multi
-        case (pos)
-            4'd0: data = values[0]; // Display 0
-            4'd1: data = values[1]; // Display 1
-            4'd2: data = values[2]; // Display 2
-            4'd3: data = values[3]; // Display 3
-            4'd4: data = values[4]; // Display 4
-            4'd5: data = values[5]; // Display 5
-            4'd6: data = values[6]; // Display 6
-            4'd7: data = values[7]; // Display 7
-            default: data = 4'd0;   // valor padrao
-        endcase
-    end else begin
-        data = 4'd0; // mostra 0 durante a multiplicacao
-    end
-end
-
-
-always_comb
-begin
-temp = digits;
-// mapeia para o values o que estiver no digits, tudo isso combinacionalmente
- 
-    values[0] = temp % 10; temp = temp/10; 
-    values[1] = temp % 10; temp = temp/10; 
-    values[2] = temp % 10; temp = temp/10; 
-    values[3] = temp % 10; temp = temp/10; 
-    values[4] = temp % 10; temp = temp/10; 
-    values[5] = temp % 10; temp = temp/10; 
-    values[6] = temp % 10; temp = temp/10; 
-    values[7] = temp % 10; 
 
 end
+
+
 
 
 
