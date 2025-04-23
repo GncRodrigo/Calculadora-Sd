@@ -138,7 +138,9 @@ module calc (
                  // Reseta pos após todos os displays serem atualizados
                         pos <= 0;
                         status <= 2'b10;
-                end else if (status == 00 || (status == 2'b01 && operacao != 4'b1100)) begin
+                end else 
+                
+                if (status == 00 || (status == 2'b01 && operacao != 4'b1100)) begin
                 
                 
                  temp = digits;
@@ -165,10 +167,11 @@ module calc (
                     4'd7: data = values[7]; // Display 7
                     default: data = 4'd0;   // valor padrao
                     endcase
-                    end 
+                    
             
                 // Incrementa pos enquanto ocupado
                     pos <= pos + 1;
+                end
 
                 end 
         end
