@@ -47,7 +47,7 @@ module calc (
             count    <= 0;
             status   <= 2'b01;   // como o status 00 significa erro, 01 ocupado, e 10 pronto. O STATUS PRONTO SIGNIFICA: PRONTO PARA RECEBER COMANDO DO CMD
             operacao <= 0;
-            pos <= 0;
+            pos <= 4'd0;
             end else if(clock) begin
 
             case (EA)
@@ -67,10 +67,10 @@ module calc (
 
                 OP: begin
                     if(cmd != operacao)begin
-                    regA <= digits; // Salva o valor em regA
-                    digits <= 0;
-                    operacao <= cmd;
-                    status <= 2'b01;
+                        regA <= digits; // Salva o valor em regA
+                        digits <= 0;
+                        operacao <= cmd;
+                        status <= 2'b01;
                     end//ATUALIZA OS DISPLAYS
                     // CMD MUDADINHO
                 end
@@ -136,13 +136,12 @@ module calc (
                // MEXEDOR DA POSIÇÃO
                  if (pos == 4'd7) begin
                  // Reseta pos após todos os displays serem atualizados
-                        pos <= 0;
+                        pos <= 4'd0;
                         status <= 2'b10;
                 end else 
                 
                 if (status == 00 || (status == 2'b01 && operacao != 4'b1100)) begin
-                
-                
+
                  temp = digits;
                 // mapeia para o values o que estiver no digits, tudo isso combinacionalmente
  
@@ -167,6 +166,7 @@ module calc (
                     4'd7: data = values[7]; // Display 7
                     default: data = 4'd0;   // valor padrao
                     endcase
+                    $display("pos = %d", pos);
                     
             
                 // Incrementa pos enquanto ocupado
