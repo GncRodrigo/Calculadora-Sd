@@ -70,7 +70,7 @@ module calc (
                     operacao <= cmd;
                     end
                     status <= 2'b01;
-                    cmd <= 0;
+                    // CMD MUDADINHO
                 end
 
                 ESPERA_B: begin
