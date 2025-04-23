@@ -166,7 +166,7 @@ module calc (
                     4'd7: data = values[7]; // Display 7
                     default: data = 4'd0;   // valor padrao
                     endcase
-                    $display("pos = %d, digits = %d", pos, digits);
+                    $display("pos = %d, temp = %d", pos, temp);
                     
             
                 // Incrementa pos enquanto ocupado
