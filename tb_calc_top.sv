@@ -29,11 +29,11 @@ module tb_calc_top;
   reset = 1; #2;
   reset = 0; #20;
 
-  cmd = 4'd1; #30;
-  cmd = 4'd2; #30;
-  cmd = 4'b1010; #30;
-  cmd = 4'd3; #30;
-  cmd = 4'b1110; #30;
+  cmd = 4'd1; #20;
+  cmd = 4'd2; #20;
+  cmd = 4'b1010; #20;
+  cmd = 4'd3; #20;
+  cmd = 4'b1110; #20;
 
   $finish;
 
