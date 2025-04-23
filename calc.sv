@@ -45,7 +45,7 @@ module calc (
             count    <= 0;
             status   <= 2'b01;   // como o status 00 significa erro, 01 ocupado, e 10 pronto. O STATUS PRONTO SIGNIFICA: PRONTO PARA RECEBER COMANDO DO CMD
             operacao <= 0;
-            pos <= 0;
+            pos <= -1;
             end else begin
 
             case (EA)
@@ -66,10 +66,8 @@ module calc (
                 OP: begin
                     regA <= digits; // Salva o valor em regA
                     digits <= 0;
-                    if( status == 2'b10) begin
                     operacao <= cmd;
-                    end
-                    status <= 2'b01;
+                    status <= 2'b01;//ATUALIZA OS DISPLAYS
                     // CMD MUDADINHO
                 end
 
@@ -133,11 +131,11 @@ module calc (
                // MEXEDOR DA POSIÇÃO
                  if (pos >= 7) begin
                  // Reseta pos após todos os displays serem atualizados
-                pos <= 0;
-                status <= 2'b10;
+                        pos <= -1;
+                        status <= 2'b10;
                 end else if (status == 00 || (status == 2'b01 && operacao != 4'b1100)) begin
                 // Incrementa pos enquanto ocupado
-                pos <= pos + 1;
+                        pos <= pos + 1;
                 end 
         end
     end
@@ -152,8 +150,8 @@ module calc (
                 end
                 else PE = ESPERA_A;
             end
-            OP: if(status == 4'b10 && cmd < 4'b1010) PE = ESPERA_B;  // ele não espera
-                else PE = OP;
+            OP: PE = ESPERA_B;  // ele não espera
+                
             ESPERA_B:
             
                 if (cmd == 4'b1110) 
@@ -218,7 +216,8 @@ always_ff @(posedge clock or posedge reset) begin
 end
 
 
-always_comb begin
+always_ff @(posedge clock or posedge reset) 
+begin
 temp = digits;
 // mapeia para o values o que estiver no digits, tudo isso combinacionalmente
  
