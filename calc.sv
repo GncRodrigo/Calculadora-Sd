@@ -216,7 +216,7 @@ always_ff @(posedge clock or posedge reset) begin
 end
 
 
-always_ff @(posedge clock or posedge reset) 
+always_comb
 begin
 temp = digits;
 // mapeia para o values o que estiver no digits, tudo isso combinacionalmente
