@@ -31,12 +31,9 @@ module tb_calc_top;
 
   cmd = 4'd1; #20;
   cmd = 4'd2; #20;
+  cmd = 4'b1010; #20;
   cmd = 4'd3; #20;
-  cmd = 4'd4; #20;
-  cmd = 4'd5; #20;
-  cmd = 4'd6; #20;
-  cmd = 4'd7; #20;
-  cmd = 4'd8; #20;
+  cmd = 4'b1110; #20;
   $finish;
 
   end
