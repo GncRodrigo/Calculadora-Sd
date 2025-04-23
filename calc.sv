@@ -45,6 +45,7 @@ module calc (
             count    <= 0;
             status   <= 2'b01;   // como o status 00 significa erro, 01 ocupado, e 10 pronto. O STATUS PRONTO SIGNIFICA: PRONTO PARA RECEBER COMANDO DO CMD
             operacao <= 0;
+            pos <= 0;
             end else begin
 
             case (EA)
@@ -128,6 +129,15 @@ module calc (
                 end
 
             endcase
+               // MEXEDOR DA POSIÇÃO
+                 if (pos >= 7) begin
+                 // Reseta pos após todos os displays serem atualizados
+                pos <= 0;
+                status <= 2'b10;
+                end else if (status == 00 || (status == 2'b01 && operacao != 4'b1100)) begin
+                // Incrementa pos enquanto ocupado
+                pos <= pos + 1;
+                end 
         end
     end
 
@@ -222,22 +232,6 @@ temp = digits;
 
 end
 
-// vai demora 7 clocks pra mostra o display td
-always_ff @(posedge clock or posedge reset) begin
-    if (reset) begin
-        pos <= 0;
-        
-    end else if (pos >= 7) begin
-        // Reseta pos após todos os displays serem atualizados
-        pos <= 0;
-        status <= 10;
-    end else if (status == 00 || (status == 2'b01 && operacao != 4'b1100)) begin
-        // Incrementa pos enquanto ocupado
-        pos <= pos + 1;
-    end else if (status == 2'b10) begin
-        // Reseta pos quando o status muda para pronto
-        pos <= 0;
-    end
-end
+
 
 endmodule
