@@ -23,7 +23,7 @@ module calc (
     logic [3:0]  operacao;
     logic [26:0] count;
 
-    logic [7:0] values [3:0];
+    logic [3:0] values [7:0];
     logic [26:0] temp;
     
 
@@ -47,7 +47,7 @@ module calc (
             count    <= 0;
             status   <= 2'b01;   // como o status 00 significa erro, 01 ocupado, e 10 pronto. O STATUS PRONTO SIGNIFICA: PRONTO PARA RECEBER COMANDO DO CMD
             operacao <= 0;
-            pos <= 4'd0;
+            pos <= 4'b0000;
             end else if(clock) begin
 
             case (EA)
@@ -134,9 +134,9 @@ module calc (
             endcase
                 //LÓGICA PARA OS DISPLAYS
                // MEXEDOR DA POSIÇÃO
-                 if (pos > 4'd7) begin
+                 if (pos > 4'b0111) begin
                  // Reseta pos após todos os displays serem atualizados
-                        pos <= 4'd0;
+                        pos <= 4'b0000;
                         status <= 2'b10;
                 end else 
                 
