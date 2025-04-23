@@ -29,11 +29,11 @@ module tb_calc_top;
   reset = 1; #2;
   reset = 0; #25;
 
-  if (status == 2'b01)begin cmd = 4'd1;    end
-  if (status == 2'b01)begin cmd = 4'd2;    end
-  if (status == 2'b01)begin cmd = 4'b1010; end
-  if (status == 2'b01)begin cmd = 4'd3;   end
-  if (status == 2'b01)begin cmd = 4'b1110; end
+  if (status == 2'b01)begin cmd = 4'd1;    end  #50;
+  if (status == 2'b01)begin cmd = 4'd2;    end  #50;
+  if (status == 2'b01)begin cmd = 4'b1010; end  #50;
+  if (status == 2'b01)begin cmd = 4'd3;   end   #50;
+  if (status == 2'b01)begin cmd = 4'b1110; end  #50;
 
   $finish;
 
