@@ -143,17 +143,17 @@ module calc (
                 if (status == 00 || (status == 2'b01 && operacao != 4'b1100)) begin
                 
 
-                 temp = digits;
+                 temp <= digits;
                 // mapeia para o values o que estiver no digits, tudo isso combinacionalmente
  
-                values[0] = temp % 10; temp = temp/10; 
-                values[1] = temp % 10; temp = temp/10; 
-                values[2] = temp % 10; temp = temp/10; 
-                values[3] = temp % 10; temp = temp/10; 
-                values[4] = temp % 10; temp = temp/10; 
-                values[5] = temp % 10; temp = temp/10; 
-                values[6] = temp % 10; temp = temp/10; 
-                values[7] = temp % 10; 
+                values[0] <= temp % 10; temp = temp/10; 
+                values[1] <= temp % 10; temp = temp/10; 
+                values[2] <= temp % 10; temp = temp/10; 
+                values[3] <= temp % 10; temp = temp/10; 
+                values[4] <= temp % 10; temp = temp/10; 
+                values[5] <= temp % 10; temp = temp/10; 
+                values[6] <= temp % 10; temp = temp/10; 
+                values[7] <= temp % 10; 
 
                 // Exibe os valores apenas se o status for ocupado, exceto durante a multi
                  data = values[pos];
