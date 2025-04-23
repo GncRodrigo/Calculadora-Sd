@@ -28,6 +28,6 @@ module display(
 
   // conecta a saída ao vetor f, utilizando o índice para selecionar
   // a linha que contém a combinação correta de valores (dígito)
-  assign {a, b, c, d, e, f, g, dp} = ff[data];
+  assign {a, b, c, d, e, f, g} = ff[data];
 
 endmodule
