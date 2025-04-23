@@ -21,7 +21,7 @@ module ctrl(
   display d7 (.data(data[7]), .a(displays[7][0]), .b(displays[7][1]), .c(displays[7][2]), .d(displays[7][3]), .e(displays[7][4]), .f(displays[7][5]), .g(displays[7][6]), .dp(ignore[7]));
 
 
-  always @(posedge clock, negedge reset) begin
+  always @(negedge clock, posedge reset) begin
 
     if(reset == 1) begin
       data[0] <= 0;
