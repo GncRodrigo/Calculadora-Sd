@@ -23,7 +23,8 @@ module calc (
     logic [26:0] regA, regB, regAux;
     logic [3:0]  operacao;
     logic [26:0] count;
-   
+    logic prontoB = 0; // flag para indicar que o segundo número foi digitado (copilot descobriu rapidão)
+
 
     // Bloco sequencial: atualização do estado
     always_ff @(posedge clock or posedge reset) begin
@@ -34,8 +35,6 @@ module calc (
         end
     end
 
-    logic prontoB = 0; // flag para indicar que o segundo número foi digitado (copilot descobriu rapidão)
-
     // Bloco sequencial: lógica da operação
     always_ff @(posedge clock or posedge reset) begin
         if (reset) begin        // reset zera tudo, evita de ficar lixo
@@ -44,7 +43,7 @@ module calc (
             regB     <= 0;
             regAux   <= 0;
             count    <= 0;
-            status   <= 2'b10;   // como o status 00 significa erro, 01 ocupado, e 10 pronto. O STATUS PRONTO SIGNIFICA: PRONTO PARA RECEBER COMANDO DO CMD
+            status   <= 2'b0;   // como o status 00 significa erro, 01 ocupado, e 10 pronto. O STATUS PRONTO SIGNIFICA: PRONTO PARA RECEBER COMANDO DO CMD
             operacao <= 0;
             end else begin
 
@@ -55,10 +54,8 @@ module calc (
                         if (cmd <= 4'd9) begin
                             digits <= (digits * 10) + cmd; // faz o deslocamento e adiciona
 
-                       
                         end else if (cmd == 4'b1111) begin
                             digits <= digits / 10; // aqui ta rolando o backspace
-                     
                         end 
                 end
                 end
@@ -121,7 +118,6 @@ module calc (
                 end
 
                 ERRO: begin
-                    digits <= 27'd0; // codigo de erro
                     status <= 2'b00; //status ERRO
                 end
 
@@ -179,7 +175,7 @@ module calc (
 
 //LÓGICA PARA OS DISPLAYS
 
-logic [3:0] values [7:0];
+logic [7:0] values [3:0];
 logic [26:0] temp;
 
 always_comb begin
@@ -201,19 +197,19 @@ always_comb begin
     end
 end
 
- 
+
 always_comb begin
 temp = digits;
 // mapeia para o values o que estiver no digits, tudo isso combinacionalmente
  
-values[0] = temp % 10; temp = temp/10; 
-values[1] = temp % 10; temp = temp/10; 
-values[2] = temp % 10; temp = temp/10; 
-values[3] = temp % 10; temp = temp/10; 
-values[4] = temp % 10; temp = temp/10; 
-values[5] = temp % 10; temp = temp/10; 
-values[6] = temp % 10; temp = temp/10; 
-values[7] = temp % 10; 
+    values[0] = temp % 10; temp = temp/10; 
+    values[1] = temp % 10; temp = temp/10; 
+    values[2] = temp % 10; temp = temp/10; 
+    values[3] = temp % 10; temp = temp/10; 
+    values[4] = temp % 10; temp = temp/10; 
+    values[5] = temp % 10; temp = temp/10; 
+    values[6] = temp % 10; temp = temp/10; 
+    values[7] = temp % 10; 
 
 end
 
@@ -222,9 +218,10 @@ always_ff @(posedge clock or posedge reset) begin
     if (reset) begin
         pos <= 0;
         
-    end else if (pos > 7) begin
+    end else if (pos >= 7) begin
         // Reseta pos após todos os displays serem atualizados
         pos <= 0;
+        status <= 10;
     end else if (status == 00 || (status == 2'b01 && operacao != 4'b1100)) begin
         // Incrementa pos enquanto ocupado
         pos <= pos + 1;

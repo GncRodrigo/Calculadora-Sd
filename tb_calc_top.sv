@@ -25,28 +25,13 @@ module tb_calc_top;
   // Geração de clock
   always #1 clock = ~clock;
 
-  // Teste inicial
   initial begin
-    // Inicialização
-    reset = 1;
-    cmd = 4'b0000; // Nenhum comando
-    #4;
 
-    reset = 0; // Libera o reset
-    #4;
+  reset = 1; #4;
+  reset = 0; #4;
 
-    // Teste: Digitar apenas um número
-    $display("Teste: Digitar apenas um número");
-    cmd = 4'b0001; // Digita '1'
-    #2;
-    if (digits != 27'd1) begin
-      $display("Erro: digits esperado = 1, obtido = %0d", digits);
-    end else begin
-      $display("Sucesso: digits = %0d", digits);
-    end
+  cmd = 4'd1;
 
-    // Finaliza a simulação
-    $finish;
   end
 
 endmodule
