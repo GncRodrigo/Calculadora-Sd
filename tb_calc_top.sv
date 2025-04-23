@@ -30,7 +30,10 @@ module tb_calc_top;
   reset = 1; #4;
   reset = 0; #4;
 
-  cmd = 4'd1;
+  cmd = 4'd1; #20;
+  cmd = 4'b1010; #20;
+  cmd = 4'd2; #20;
+  cmd = 4'b1110; #20;
 
   end
 

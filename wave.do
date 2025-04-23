@@ -6,7 +6,8 @@ add wave -divider "Testbench"
 add wave -decimal sim:/tb_calc_top/clock
 add wave -decimal sim:/tb_calc_top/reset
 add wave -decimal sim:/tb_calc_top/cmd
-add wave -decimal sim:/tb_calc_top/status
+add wave -binary sim:/tb_calc_top/status
+add wave -decimal sim:/tb_calc_top/displays
 
 # Mostra os displays
 add wave -divider "Displays"
