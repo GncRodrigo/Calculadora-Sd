@@ -22,7 +22,7 @@ module tb_calc_top;
   );
 
   // Geração de clock
-  always #1 clock = ~clock;
+  always #2 clock = ~clock;
 
   initial begin
 
