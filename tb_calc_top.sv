@@ -22,20 +22,21 @@ module tb_calc_top;
   );
 
   // Geração de clock
-  always #2 clock = ~clock;
-
-
-  reset = 1; #2;
-  reset = 0; #25;
+  always #1 clock = ~clock;
 
   initial begin
 
-    cmd = 4'd1; #20;
-    cmd = 4'b1010; #20;
-    cmd = 4'd3; #20;
-    cmd = 4'b1110; #20;
-  
-  
+  reset = 1; #2;
+  reset = 0; #20;
+
+  cmd = 4'd1; #30;
+  cmd = 4'd2; #30;
+  cmd = 4'b1010; #30;
+  cmd = 4'd3; #30;
+  cmd = 4'b1110; #30;
+
+  $finish;
+
   end
 
 
