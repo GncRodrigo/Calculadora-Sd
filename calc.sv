@@ -161,7 +161,7 @@ module calc (
                     PE = RESULT;
                 end 
 
-                else if (cmd >= 4'b1010 && cmd < 4'b1110) // passa de op com cmd sendo 1010 ainda
+                else if (cmd >= 4'b1010 && cmd < 4'b1110)
                 begin
                     PE = ERRO;
                 end
