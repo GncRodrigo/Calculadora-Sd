@@ -70,6 +70,7 @@ module calc (
                     operacao <= cmd;
                     end
                     status <= 2'b01;
+                    cmd <= 0;
                 end
 
                 ESPERA_B: begin
@@ -151,7 +152,7 @@ module calc (
                 end
                 else PE = ESPERA_A;
             end
-            OP: PE = ESPERA_B;
+            OP: PE = ESPERA_B;  // ele não espera
 
             ESPERA_B:
             
@@ -160,7 +161,7 @@ module calc (
                     PE = RESULT;
                 end 
 
-                else if (cmd >= 4'b1010 && cmd < 4'b1110) 
+                else if (cmd >= 4'b1010 && cmd < 4'b1110) // passa de op com cmd sendo 1010 ainda
                 begin
                     PE = ERRO;
                 end
