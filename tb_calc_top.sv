@@ -27,13 +27,13 @@ module tb_calc_top;
   initial begin
 
   reset = 1; #2;
-  reset = 0; #20;
+  reset = 0; #25;
 
-  cmd = 4'd1; #50;
-  cmd = 4'd2; #50;
-  cmd = 4'b1010; #50;
-  cmd = 4'd3; #50;
-  cmd = 4'b1110; #50;
+  if (status == 2'b01)begin cmd = 4'd1;    end
+  if (status == 2'b01)begin cmd = 4'd2;    end
+  if (status == 2'b01)begin cmd = 4'b1010; end
+  if (status == 2'b01)begin cmd = 4'd3;   end
+  if (status == 2'b01)begin cmd = 4'b1110; end
 
   $finish;
 
