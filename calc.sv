@@ -71,9 +71,12 @@ module calc (
                     if(cmd != operacao)begin
                         regA <= digits; // Salva o valor em regA
                         digits <= 0;
-                        operacao <= cmd;
-                        status <= 2'b01;
-                    end//ATUALIZA OS DISPLAYS
+                      
+                    end
+                      if(cmd > 4'd9) begin
+                      operacao <= cmd;
+                        status <= 2'b01;end
+                    //ATUALIZA OS DISPLAYS
                     // CMD MUDADINHO
                 end
 
