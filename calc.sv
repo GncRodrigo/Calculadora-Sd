@@ -97,8 +97,8 @@ module calc (
                 end
 
                 RESULT: begin
-                    $display("OPERAÇÃO = %d", operacao);
-                    $display("STATUS = %d", status);
+                    $display("OPERAÇÃO = %b", operacao);
+                    $display("STATUS = %b", status);
                     if (status == 2'b10) begin
                         
                     case (operacao)
