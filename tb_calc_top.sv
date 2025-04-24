@@ -40,6 +40,6 @@ module tb_calc_top;
   cmd = 4'b1100; #20;
   cmd = 4'd3; #50;
   cmd = 4'b1110; #20;
-  #100
+  #100;
   end
 endmodule
