@@ -5,7 +5,10 @@ module calc (
 
     output logic [1:0] status,
     output logic [3:0] data,
-    output logic [3:0] pos
+    output logic [3:0] pos,
+    output logic [2:0] EA,
+    output logic [2:0] PE
+
     
 );
 
@@ -15,8 +18,7 @@ module calc (
     localparam RESULT   = 3'b011;
     localparam ERRO     = 3'b100;
 
-    logic [2:0] EA;
-    logic [2:0] PE;
+    
     logic [26:0] digits;
 
     logic [26:0] regA, regB, regAux;
@@ -161,7 +163,7 @@ module calc (
                 end 
         end
 
-    // mudar as posições
+    // mudar as maquina de estados
     always_ff @(posedge clock) begin
        
         case (EA)

@@ -10,6 +10,9 @@ module tb_calc_top;
   // Outputs
   logic [6:0] displays [7:0];
   logic [1:0] status;
+  logic [2:0] EA;
+  logic [2:0] PE;
+  
   
 
   // Instância do DUT (Device Under Test)
@@ -18,7 +21,9 @@ module tb_calc_top;
     .reset(reset),
     .cmd(cmd),
     .displays(displays),
-    .status(status)
+    .status(status),
+    .EA(EA),
+    .PE(PE)
   );
 
   // Geração de clock
