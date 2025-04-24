@@ -8,8 +8,6 @@ module calc (
     output logic [3:0] pos,
     output logic [2:0] EA,
     output logic [2:0] PE
-
-    
 );
 
     localparam ESPERA_A = 3'b000;
@@ -171,7 +169,7 @@ module calc (
 
     // mudar as maquina de estados
     always_comb begin
-       
+       PE = EA;
         case (EA)
             ESPERA_A: begin
                 if (status == 2'b10) begin
@@ -198,9 +196,12 @@ module calc (
                      PE = ESPERA_A;
             end
 
-            ERRO:
+            ERRO: begin
                 PE <= ERRO; //fica no erro até dar reset
-
+            end
+            default: begin
+                PE <= ERRO;
+            end
         endcase
     end
 endmodule
