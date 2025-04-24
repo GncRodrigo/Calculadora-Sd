@@ -15,6 +15,8 @@ module calc (
     localparam OP       = 3'b010;
     localparam RESULT   = 3'b011;
     localparam ERRO     = 3'b100;
+    localparam EXIBE_DISPLAYS = 3'b101;
+
 
     
     logic [26:0] digits;
@@ -138,28 +140,20 @@ module calc (
                 end
 
             endcase
-                //LÓGICA PARA OS DISPLAYS
-               // MEXEDOR DA POSIÇÃO
-                 if (pos > 4'b0111) begin
-                 // Reseta pos após todos os displays serem atualizados
-                        pos <= 4'b0000;
-                        status <= 2'b10;
-                end else 
-                
-                if (status == 00 || (status == 2'b01 && operacao != 4'b1100)) begin
-                
-                if(pos == 0)begin temp = digits;end
-                // mapeia para o values o que estiver no digits, tudo isso combinacionalmente
- 
-                        values[pos] <= temp % 10; temp <= temp/10; 
-                
-                // Exibe os valores apenas se o status for ocupado, exceto durante a multi
-                        data <= values[pos];
-                   
-                // Incrementa pos enquanto ocupado
-                        pos <= pos + 1;
-                    end
+                // LÓGICA PARA OS DISPLAYS
+                    if (EA == EXIBE_DISPLAYS) begin
+                        if (pos == 0) temp <= digits;
 
+                        if (pos < 8) begin
+                            values[pos] <= temp % 10;
+                            temp <= temp / 10;
+                            data <= values[pos];
+                            pos <= pos + 1;
+                        end else begin
+                            pos <= 0;
+                            status <= 2'b10; // Liberado para próximo comando
+                        end
+                    end
                 end 
         end
 
@@ -180,7 +174,7 @@ module calc (
             end
             ESPERA_B: begin
                     if(status == 2'b10) begin
-                        if(cmd < 2'd9 || cmd == 4'b1111)
+                        if(cmd < 4'd9 || cmd == 4'b1111)
                             PE = ESPERA_B; 
                         else if(cmd == 4'b1110)
                                     PE = RESULT;
@@ -188,15 +182,20 @@ module calc (
                     end
             end
             RESULT: begin
-                if (reset)
-                     PE = ESPERA_A;
+                if (status == 2'b10)
+                    PE = EXIBE_DISPLAYS;
+                else
+                    PE = RESULT;
             end
 
             ERRO: begin
                 PE <= ERRO; //fica no erro até dar reset
             end
             default: begin
-                PE <= ERRO;
+                if (status == 2'b01)
+                    PE = EXIBE_DISPLAYS;
+                else
+                    PE = EA;
             end
         endcase
     end

@@ -29,17 +29,24 @@ module tb_calc_top;
   // Geração de clock
   always #1 clock = ~clock;
 
+    task espera_displays;
+    begin
+      wait (status == 2'b10);
+      #2;
+    end
+  endtask
+
   initial begin
+    reset = 0; #2;
+    reset = 1; #2;
+    reset = 0; #2;
 
-  reset = 0; #2;
-  reset = 1; #2;
-  reset = 0; #2;
+    espera_displays(); cmd = 4'd1; #2;
+    espera_displays(); cmd = 4'd2; #2;
+    espera_displays(); cmd = 4'b1100; #2; // *
+    espera_displays(); cmd = 4'd3; #2;
+    espera_displays(); cmd = 4'b1110; #2; // =
 
-  cmd = 4'd1; #20;
-  cmd = 4'd2; #20;
-  cmd = 4'b1100; #20;
-  cmd = 4'd3; #100;
-  cmd = 4'b1110; #20;
-  #100;
+    #100;
   end
 endmodule
