@@ -17,4 +17,4 @@ add wave -binary sim:/tb_calc_top/displays
 
 
 # Executa a simulação
-run 500ns
+run 400ns
