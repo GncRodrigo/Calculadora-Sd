@@ -7,9 +7,7 @@ module calc (
     output logic [3:0] data,
     output logic [3:0] pos,
     output logic [2:0] EA,
-    output logic [2:0] PE,
-    output logic [2:0] SA
-
+    output logic [2:0] PE
 
     
 );
@@ -19,8 +17,6 @@ module calc (
     localparam OP       = 3'b010;
     localparam RESULT   = 3'b011;
     localparam ERRO     = 3'b100;
-    localparam PRINT    = 3'b101;
-
 
     
     logic [26:0] digits;
@@ -37,7 +33,7 @@ module calc (
     // Bloco sequencial: atualização do estado
     always_ff @(posedge clock or posedge reset) begin
         if (reset) begin
-            EA <= PRINT;
+            EA <= ESPERA_A;
         end else begin
             EA <= PE;
         end
@@ -51,7 +47,7 @@ module calc (
             regB     <= 0;
             regAux   <= 0;
             count    <= 0;
-            status   <= 2'b10;   // como o status 00 significa erro, 01 ocupado, e 10 pronto. O STATUS PRONTO SIGNIFICA: PRONTO PARA RECEBER COMANDO DO CMD
+            status   <= 2'b01;   // como o status 00 significa erro, 01 ocupado, e 10 pronto. O STATUS PRONTO SIGNIFICA: PRONTO PARA RECEBER COMANDO DO CMD
             operacao <= 0;
             pos <= 4'b0000;
             end else if(clock) begin
@@ -139,8 +135,11 @@ module calc (
                 
                 end
 
-                PRINT:begin
+                ERRO: begin
+                    status <= 2'b00; //status ERRO
+                end
 
+            endcase
                 //LÓGICA PARA OS DISPLAYS
                // MEXEDOR DA POSIÇÃO
                  if (pos > 4'b0111) begin
@@ -149,75 +148,63 @@ module calc (
                         status <= 2'b10;
                 end else 
                 
+                if (status == 00 || (status == 2'b01 && operacao != 4'b1100)) begin
                 
-            
+
                 if(pos == 0)begin temp = digits;end
                 // mapeia para o values o que estiver no digits, tudo isso combinacionalmente
  
                 values[pos] <= temp % 10; temp <= temp/10; 
                 
+
                 // Exibe os valores apenas se o status for ocupado, exceto durante a multi
                  data <= values[pos];
                    
+                    
+            
                 // Incrementa pos enquanto ocupado
                     pos <= pos + 1;
                 end
 
-
-                ERRO: begin
-                    status <= 2'b00; //status ERRO
-                end
-
-                
-            endcase
-                
-
                 end 
         end
-    
+
     // mudar as maquina de estados
-    always_ff @(posedge clock, posedge reset) begin
-        if(reset) begin SA <= ESPERA_A;
-        $display("Reset ativado: SA = %b", SA);  end
-        else if(clock)begin
+    always_ff @(posedge clock) begin
        
         case (EA)
             ESPERA_A: begin
                 if ((cmd > 4'd9)&&(cmd < 4'd11))begin
                     PE <= OP;
-                    
                 end
-                else if(cmd < 4'd10 && cmd != 0) begin PE <= PRINT; SA <= ESPERA_A;  end
-                
+                else PE <= ESPERA_A;
             end
             OP: if(status == 4'b10 && cmd < 4'b1010) PE <= ESPERA_B; 
-            else begin PE <= PRINT; SA <= OP; end
+            else PE <= OP;
                 
             ESPERA_B:
             
                 if (cmd == 4'b1110) 
                 begin
-                    PE <= PRINT;
-                    SA <= RESULT;
+                    PE <= RESULT;
                 end 
 
                 else if (cmd >= 4'b1010 && cmd < 4'b1110)
                 begin
                     PE <= ERRO;
                 end
-                else begin PE <= PRINT; SA <= ESPERA_B; end
+                else PE <= ESPERA_B;
                 
             RESULT: begin
                 if( status == 2'b10)begin
                 case (operacao)
-                    4'b1010: begin PE <= PRINT; SA <= ESPERA_A; end
+                    4'b1010: PE <= ESPERA_A;
 
-                    4'b1011: begin PE <= PRINT; SA <= ESPERA_A; end
+                    4'b1011: PE <= ESPERA_A;
 
                     4'b1100:begin
                         if (status != 2'b01 && count == 0)begin
-                            PE <= PRINT;
-                            SA <= ESPERA_A;
+                            PE <= ESPERA_A;
                         end
                         else begin
                             PE <= RESULT;
@@ -230,17 +217,10 @@ module calc (
                 end else PE <= RESULT;
             end
 
-            PRINT:begin
-                if(status == 2'b10) PE <= SA;
-                else PE <= PRINT;
-
-            end
-
             ERRO:
                 PE <= ERRO; //fica no erro até dar reset
 
         endcase
-        end
     end
 
 

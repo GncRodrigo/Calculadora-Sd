@@ -12,7 +12,6 @@ module tb_calc_top;
   logic [1:0] status;
   logic [2:0] EA;
   logic [2:0] PE;
-  logic [2:0] SA;
   
   
 
@@ -24,26 +23,22 @@ module tb_calc_top;
     .displays(displays),
     .status(status),
     .EA(EA),
-    .PE(PE),
-    .SA(SA)
+    .PE(PE)
   );
 
   // Geração de clock
   always #1 clock = ~clock;
 
   initial begin
-  
-  reset = 0; #2;
+
   reset = 1; #2;
-  reset = 0;
+  reset = 0; #20;
 
   cmd = 4'd1; #20;
   cmd = 4'd2; #20;
   cmd = 4'b1010; #20;
   cmd = 4'd3; #20;
   cmd = 4'b1110; #20;
-
-  $finish;
 
   end
 
