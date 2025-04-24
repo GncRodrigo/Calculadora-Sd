@@ -177,7 +177,7 @@ module calc (
         end
     
     // mudar as maquina de estados
-    always_ff @(posedge clock, posedge reset) begin
+    always_ff @(posedge clock, negedge reset) begin
         if(reset) SA <= ESPERA_A;
         else begin
        
