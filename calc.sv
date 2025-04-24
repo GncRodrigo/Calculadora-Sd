@@ -186,7 +186,7 @@ module calc (
                     PE <= OP;
                     
                 end
-                else if(cmd < 4'd10) begin PE <= PRINT; SA <= ESPERA_A;  end
+                else if(cmd < 4'd10 && cmd != 0) begin PE <= PRINT; SA <= ESPERA_A;  end
                 
             end
             OP: if(status == 4'b10 && cmd < 4'b1010) PE <= ESPERA_B; 
