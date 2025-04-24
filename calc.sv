@@ -127,8 +127,8 @@ module calc (
                             end
                         end
                         default: begin
-                            digits <= 27'd0; 
-                            status <= 2'b00; // Erro
+                            
+                             // Erro
                         end
                     endcase
                     end
@@ -216,7 +216,7 @@ module calc (
             end
 
             ERRO:
-                PE <= ERRO; //fica no erro até dar reset
+                PE <= RESULT; //fica no erro até dar reset
 
         endcase
     end
