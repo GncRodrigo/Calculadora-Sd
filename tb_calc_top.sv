@@ -32,10 +32,11 @@ module tb_calc_top;
   always #1 clock = ~clock;
 
   initial begin
-
+  
+  reset = 0; #2;
   reset = 1; #2;
   reset = 0;
-  
+
   cmd = 4'd1; #20;
   cmd = 4'd2; #20;
   cmd = 4'b1010; #20;

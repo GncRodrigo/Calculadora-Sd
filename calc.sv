@@ -37,7 +37,7 @@ module calc (
     // Bloco sequencial: atualização do estado
     always_ff @(posedge clock or posedge reset) begin
         if (reset) begin
-            EA <= ESPERA_A;
+            EA <= PRINT;
         end else begin
             EA <= PE;
         end
@@ -177,7 +177,7 @@ module calc (
     
     // mudar as maquina de estados
     always_ff @(posedge clock, posedge reset) begin
-        if(reset) begin SA <= ESPERA_A; PE<= ESPERA_A; end
+        if(reset) begin SA <= ESPERA_A;  end
         else begin
        
         case (EA)
