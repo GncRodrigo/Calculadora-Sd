@@ -151,7 +151,7 @@ module calc (
                 
                 
             
-                if(pos == 0)begin temp <= digits;end
+                if(pos == 0)begin temp = digits;end
                 // mapeia para o values o que estiver no digits, tudo isso combinacionalmente
  
                 values[pos] <= temp % 10; temp <= temp/10; 
