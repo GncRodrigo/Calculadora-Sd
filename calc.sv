@@ -169,48 +169,48 @@ module calc (
         case (EA)
             ESPERA_A: begin
                 if ((cmd > 4'd9)&&(cmd < 4'd11))begin
-                    PE = OP;
+                    PE <= OP;
                 end
-                else PE = ESPERA_A;
+                else PE <= ESPERA_A;
             end
-            OP: if(status == 4'b10 && cmd < 4'b1010) PE = ESPERA_B; 
-            else PE = OP;
+            OP: if(status == 4'b10 && cmd < 4'b1010) PE <= ESPERA_B; 
+            else PE <= OP;
                 
             ESPERA_B:
             
                 if (cmd == 4'b1110) 
                 begin
-                    PE = RESULT;
+                    PE <= RESULT;
                 end 
 
                 else if (cmd >= 4'b1010 && cmd < 4'b1110)
                 begin
-                    PE = ERRO;
+                    PE <= ERRO;
                 end
-                else PE = ESPERA_B;
+                else PE <= ESPERA_B;
                 
             RESULT: begin
                 case (operacao)
-                    4'b1010: PE = ESPERA_A;
+                    4'b1010: PE <= ESPERA_A;
 
-                    4'b1011: PE = ESPERA_A;
+                    4'b1011: PE <= ESPERA_A;
 
                     4'b1100:begin
                         if (status != 2'b01 && count == 0)begin
-                            PE = ESPERA_A;
+                            PE <= ESPERA_A;
                         end
                         else begin
-                            PE = RESULT;
+                            PE <= RESULT;
                         end
                     end
                     default:
-                        PE = ERRO;
+                        PE <= ERRO;
                 
                 endcase
             end
 
             ERRO:
-                PE = ERRO; //fica no erro até dar reset
+                PE <= ERRO; //fica no erro até dar reset
 
         endcase
     end
