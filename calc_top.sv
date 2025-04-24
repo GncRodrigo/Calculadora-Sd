@@ -6,7 +6,8 @@ module calc_top(
     output logic [6:0] displays [7:0],
     output logic [1:0] status,
     output logic [2:0] EA,
-    output logic [2:0] PE
+    output logic [2:0] PE,
+    output logic [2:0] SA
 
     
 );
@@ -22,7 +23,8 @@ calc calculadera (
     .data(data), 
     .pos(pos),
     .EA(EA),
-    .PE(PE)
+    .PE(PE),
+    .SA(SA)
 );
 
 ctrl controladoro (

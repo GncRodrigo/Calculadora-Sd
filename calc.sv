@@ -139,7 +139,7 @@ module calc (
                 
                 end
 
-                PRINT:
+                PRINT:begin
 
                 //LÓGICA PARA OS DISPLAYS
                // MEXEDOR DA POSIÇÃO
@@ -161,7 +161,7 @@ module calc (
                    
                 // Incrementa pos enquanto ocupado
                     pos <= pos + 1;
-                
+                end
 
 
                 ERRO: begin
