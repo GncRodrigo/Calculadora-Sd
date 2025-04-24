@@ -4,7 +4,7 @@ delete wave *
 # Mostra sinais do testbench
 add wave -divider "Testbench"
 #coloca EA para checar
-add wave -binary sim:/tb_calc_top/SA
+
 add wave -binary sim:/tb_calc_top/EA
 add wave -binary sim:/tb_calc_top/PE
 add wave -decimal sim:/tb_calc_top/clock
