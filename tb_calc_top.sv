@@ -38,7 +38,7 @@ module tb_calc_top;
   cmd = 4'd1; #20;
   cmd = 4'd2; #20;
   cmd = 4'b1100; #20;
-  cmd = 4'd3; #50;
+  cmd = 4'd3; #100;
   cmd = 4'b1110; #20;
   #100;
   end
