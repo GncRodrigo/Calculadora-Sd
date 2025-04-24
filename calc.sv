@@ -177,7 +177,8 @@ module calc (
     
     // mudar as maquina de estados
     always_ff @(posedge clock, posedge reset) begin
-        if(reset) begin SA <= ESPERA_A;  end
+        if(reset) begin SA <= ESPERA_A;
+        $display("Reset ativado: SA = %b", SA);  end
         else if(clock)begin
        
         case (EA)
