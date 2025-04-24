@@ -47,7 +47,7 @@ module calc (
             regB     <= 0;
             regAux   <= 0;
             count    <= 0;
-            status   <= 2'b01;   // como o status 00 significa erro, 01 ocupado, e 10 pronto. O STATUS PRONTO SIGNIFICA: PRONTO PARA RECEBER COMANDO DO CMD
+            status   <= 2'b10;   // como o status 00 significa erro, 01 ocupado, e 10 pronto. O STATUS PRONTO SIGNIFICA: PRONTO PARA RECEBER COMANDO DO CMD
             operacao <= 0;
             pos <= 4'b0000;
             end else if(clock) begin
