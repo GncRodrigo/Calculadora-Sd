@@ -73,7 +73,8 @@ module calc (
                     end
                       if(cmd > 4'd9) begin
                         operacao <= cmd;
-                        status <= 2'b01;end
+                        status <= 2'b01;
+                    end
                     //ATUALIZA OS DISPLAYS
                     // CMD MUDADINHO
                 end
@@ -140,30 +141,22 @@ module calc (
             endcase
                 //LÓGICA PARA OS DISPLAYS
                // MEXEDOR DA POSIÇÃO
-                 if (pos > 4'b0111) begin
-                 // Reseta pos após todos os displays serem atualizados
-                        pos <= 4'b0000;
-                        status <= 2'b10;
-                end else 
-                
-                if (status == 00 || (status == 2'b01 && operacao != 4'b1100)) begin
-                
+                    if(pos == 7) status <= 2'b10; 
+                        else begin
+                            if (status == 00 || (status == 2'b01 && operacao != 4'b1100)) begin
+                            
+                            if(pos == 0)begin temp = digits;end
+                            // mapeia para o values o que estiver no digits, tudo isso combinacionalmente
+    
+                            values[pos] <= temp % 10; temp <= temp/10; 
 
-                if(pos == 0)begin temp = digits;end
-                // mapeia para o values o que estiver no digits, tudo isso combinacionalmente
- 
-                values[pos] <= temp % 10; temp <= temp/10; 
-                
+                            // Exibe os valores apenas se o status for ocupado, exceto durante a multi
+                            data <= values[pos];
 
-                // Exibe os valores apenas se o status for ocupado, exceto durante a multi
-                 data <= values[pos];
-                   
-                    
-            
-                // Incrementa pos enquanto ocupado
-                    pos <= pos + 1;
-                end
-
+                            // Incrementa pos enquanto ocupado
+                            pos <= (pos + 1)%8;
+                            end
+                    end
                 end 
         end
 
@@ -179,7 +172,7 @@ module calc (
                 end
             end
             OP: begin 
-                if(status == 4'b10 && cmd < 4'b1010) PE <= ESPERA_B; 
+                if(status == 2'b10 && cmd < 4'b1010) PE <= ESPERA_B; 
                     else PE <= OP;
             end
             ESPERA_B: begin
