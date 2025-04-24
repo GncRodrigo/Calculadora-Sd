@@ -196,6 +196,7 @@ module calc (
                 else PE <= ESPERA_B;
                 
             RESULT: begin
+                if( status == 2'b10)begin
                 case (operacao)
                     4'b1010: PE <= ESPERA_A;
 
@@ -210,9 +211,10 @@ module calc (
                         end
                     end
                     default:
-                        PE <= RESULT;
+                        PE <= ERRO;
                 
                 endcase
+                end else PE <= RESULT;
             end
 
             ERRO:
