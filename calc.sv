@@ -210,13 +210,13 @@ module calc (
                         end
                     end
                     default:
-                        PE <= ERRO;
+                        PE <= RESULT;
                 
                 endcase
             end
 
             ERRO:
-                PE <= RESULT; //fica no erro até dar reset
+                PE <= ERRO; //fica no erro até dar reset
 
         endcase
     end
