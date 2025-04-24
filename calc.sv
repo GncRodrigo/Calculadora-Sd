@@ -98,6 +98,7 @@ module calc (
 
                 RESULT: begin
                     if (status == 2'b10) begin
+                        $display("OPERAÇÃO = %d", operacao);
                     case (operacao)
                         4'b1010: begin 
                             digits <= regA + regB;  
@@ -153,7 +154,7 @@ module calc (
 
                 // Exibe os valores apenas se o status for ocupado, exceto durante a multi
                  data <= values[pos];
-                    $display("pos = %d, temp = %d", pos, temp);
+                   
                     
             
                 // Incrementa pos enquanto ocupado
