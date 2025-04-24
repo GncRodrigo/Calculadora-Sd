@@ -27,6 +27,7 @@ module calc (
 
     logic [3:0] values [7:0];
     logic [26:0] temp;
+    logic enable;
     
 
 
@@ -140,30 +141,31 @@ module calc (
                 end
 
             endcase
+                if(!enable)begin
+                    enable <= 1;
+                end
                 //LÓGICA PARA OS DISPLAYS
                // MEXEDOR DA POSIÇÃO
+               if (enable) begin
                  if (pos > 4'b0111) begin
                  // Reseta pos após todos os displays serem atualizados
                         pos <= 4'b0000;
                         status <= 2'b10;
-                end else 
+                 end else begin
                 
                 if (status == 00 || (status == 2'b01 && operacao != 4'b1100)) begin
-                
-
+            
                 if(pos == 0)begin temp <= digits;end
                 // mapeia para o values o que estiver no digits, tudo isso combinacionalmente
  
                 values[pos] <= temp % 10; temp <= temp/10; 
-                
-
+            
                 // Exibe os valores apenas se o status for ocupado, exceto durante a multi
                  data <= values[pos];
-                   
-                    
-            
                 // Incrementa pos enquanto ocupado
                     pos <= pos + 1;
+                end
+                 end
                 end
 
                 end 
