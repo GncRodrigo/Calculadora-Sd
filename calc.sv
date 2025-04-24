@@ -97,8 +97,10 @@ module calc (
                 end
 
                 RESULT: begin
+                    $display("OPERAÇÃO = %d", operacao);
+                    $display("STATUS = %d", status);
                     if (status == 2'b10) begin
-                        $display("OPERAÇÃO = %d", operacao);
+                        
                     case (operacao)
                         4'b1010: begin 
                             digits <= regA + regB;  
