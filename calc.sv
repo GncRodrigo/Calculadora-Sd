@@ -38,7 +38,7 @@ module calc (
     always_ff @(posedge clock or posedge reset) begin
         if (reset) begin
             EA <= ESPERA_A;
-            SA <= ESPERA_A;
+            
         end else begin
             EA <= PE;
         end
@@ -177,7 +177,9 @@ module calc (
         end
     
     // mudar as maquina de estados
-    always_ff @(posedge clock) begin
+    always_ff @(posedge clock, posedge reset) begin
+        if(reset) SA <= ESPERA_A;
+        else begin
        
         case (EA)
             ESPERA_A: begin
@@ -238,6 +240,7 @@ module calc (
                 PE <= ERRO; //fica no erro até dar reset
 
         endcase
+        end
     end
 
 
