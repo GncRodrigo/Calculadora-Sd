@@ -74,7 +74,7 @@ module calc (
                       
                     end
                       if(cmd > 4'd9) begin
-                      operacao <= cmd;
+                        operacao <= cmd;
                         status <= 2'b01;end
                     //ATUALIZA OS DISPLAYS
                     // CMD MUDADINHO
@@ -170,51 +170,32 @@ module calc (
         end
 
     // mudar as maquina de estados
-    always_ff @(posedge clock) begin
+    always_comb begin
        
         case (EA)
             ESPERA_A: begin
-                if ((cmd > 4'd9)&&(cmd < 4'd11))begin
-                    PE <= OP;
+                if (status == 2'b10) begin
+                   if(cmd < 4'd9 || cmd == 4'b1111)
+                        PE <= ESPERA_A;
+                   else PE <= OP;
                 end
-                else PE <= ESPERA_A;
             end
-            OP: if(status == 4'b10 && cmd < 4'b1010) PE <= ESPERA_B; 
-            else PE <= OP;
-                
-            ESPERA_B:
-            
-                if (cmd == 4'b1110) 
-                begin
-                    PE <= RESULT;
-                end 
-
-                else if (cmd >= 4'b1010 && cmd < 4'b1110)
-                begin
-                    PE <= ERRO;
-                end
-                else PE <= ESPERA_B;
-                
-            RESULT: begin
-                if( status == 2'b10)begin
-                case (operacao)
-                    4'b1010: PE <= ESPERA_A;
-
-                    4'b1011: PE <= ESPERA_A;
-
-                    4'b1100:begin
-                        if (status != 2'b01 && count == 0)begin
-                            PE <= ESPERA_A;
-                        end
-                        else begin
-                            PE <= RESULT;
-                        end
+            OP: begin 
+                if(status == 4'b10 && cmd < 4'b1010) PE <= ESPERA_B; 
+                    else PE <= OP;
+            end
+            ESPERA_B: begin
+                    if(status == 2'b10) begin
+                        if(cmd < 2'd9 || cmd == 4'b1111)
+                            PE = ESPERA_B; 
+                        else if(cmd == 4'b1110)
+                                    PE = RESULT;
+                        else PE = ERRO;
                     end
-                    default:
-                        PE <= ERRO;
-                
-                endcase
-                end else PE <= RESULT;
+            end
+            RESULT: begin
+                if (reset)
+                     PE = ESPERA_A;
             end
 
             ERRO:
@@ -222,7 +203,4 @@ module calc (
 
         endcase
     end
-
-
-
 endmodule
