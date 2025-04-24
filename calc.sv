@@ -38,6 +38,7 @@ module calc (
     always_ff @(posedge clock or posedge reset) begin
         if (reset) begin
             EA <= ESPERA_A;
+            SA <= ESPERA_A;
         end else begin
             EA <= PE;
         end
